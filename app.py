@@ -8,9 +8,11 @@ import psycopg2
 import psycopg2.extras
 import os
 import requests
+import logging
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.DEBUG)
 CORS(app)
 
 # -------------------------------
@@ -87,9 +89,10 @@ def add_asin():
         row = cur.fetchone()
         conn.close()
         return jsonify(row), 201
-    except psycopg2.errors.UniqueViolation:
+    except Exception as e:
         conn.close()
-        return jsonify({"error": "ASIN already exists"}), 409
+        Logger.log(f"Error adding ASIN: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 # Delete an ASIN (soft delete)
