@@ -63,37 +63,44 @@ def get_asins():
 # Add a new ASIN
 @app.route("/asins", methods=["POST"])
 def add_asin():
-    data = request.json
-    asin = data.get("asin", "").strip().upper()
-    if not asin:
-        return jsonify({"error": "ASIN is required"}), 400
-
-    conn = get_db()
-    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
     try:
-        cur.execute("""
-            INSERT INTO asins (asin, title, brand, category, weight, cost, notes)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            RETURNING *
-        """, (
-            asin,
-            data.get("title", ""),
-            data.get("brand", ""),
-            data.get("category", ""),
-            data.get("weight"),
-            data.get("cost"),
-            data.get("notes", "")
-        ))
-        conn.commit()
-        row = cur.fetchone()
-        conn.close()
-        return jsonify(row), 201
-    except Exception as e:
-        conn.close()
-        Logger.log(f"Error adding ASIN: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        data = request.json
+        logging.debug(f"Received data: {data}")
+        
+        asin = data.get("asin", "").strip().upper()
+        if not asin:
+            return jsonify({"error": "ASIN is required"}), 400
 
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        try:
+            cur.execute("""
+                INSERT INTO asins (asin, title, brand, category, weight, cost, notes)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING *
+            """, (
+                asin,
+                data.get("title", ""),
+                data.get("brand", ""),
+                data.get("category", ""),
+                data.get("weight"),
+                data.get("cost"),
+                data.get("notes", "")
+            ))
+            conn.commit()
+            row = cur.fetchone()
+            conn.close()
+            return jsonify(dict(row)), 201
+        except Exception as db_error:
+            conn.rollback()
+            conn.close()
+            logging.error(f"Database error: {str(db_error)}")
+            return jsonify({"error": str(db_error)}), 500
+
+    except Exception as e:
+        logging.error(f"General error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 # Delete an ASIN (soft delete)
 @app.route("/asins/<asin>", methods=["DELETE"])
