@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ASIN Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1d2e;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #2e3150;
+    }
+
+    header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #7c83ff;
+      letter-spacing: 1px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    button:hover { opacity: 0.85; }
+
+    .btn-primary { background: #7c83ff; color: #fff; }
+    .btn-success { background: #2ecc71; color: #fff; }
+    .btn-danger  { background: #e74c3c; color: #fff; font-size: 11px; padding: 4px 10px; }
+    .btn-sm      { font-size: 11px; padding: 4px 10px; background: #2e3150; color: #aaa; }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 32px;
+    }
+
+    /* STATS BAR */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #1a1d2e;
+      border: 1px solid #2e3150;
+      border-radius: 10px;
+      padding: 16px 24px;
+      flex: 1;
+      text-align: center;
+    }
+
+    .stat-card .number {
+      font-size: 28px;
+      font-weight: 700;
+      color: #7c83ff;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    /* ADD ASIN PANEL */
+    .add-panel {
+      background: #1a1d2e;
+      border: 1px solid #2e3150;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    .add-panel.open { display: block; }
+
+    .add-panel h3 {
+      margin-bottom: 16px;
+      font-size: 15px;
+      color: #aaa;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .form-group label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input {
+      background: #0f1117;
+      border: 1px solid #2e3150;
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #7c83ff;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    /* FILTERS */
+    .filters {
+      background: #1a1d2e;
+      border: 1px solid #2e3150;
+      border-radius: 10px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filters input {
+      background: #0f1117;
+      border: 1px solid #2e3150;
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #e0e0e0;
+      font-size: 13px;
+      width: 220px;
+    }
+
+    .filters input:focus {
+      outline: none;
+      border-color: #7c83ff;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* TABLE */
+    .table-wrap {
+      background: #1a1d2e;
+      border: 1px solid #2e3150;
+      border-radius: 10px;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      background: #12152a;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #7c83ff;
+      white-space: nowrap;
+      border-bottom: 1px solid #2e3150;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    thead th:hover { background: #1a1d3a; }
+
+    tbody tr {
+      border-bottom: 1px solid #1e2138;
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: #1e2240; }
+
+    tbody td {
+      padding: 11px 16px;
+      white-space: nowrap;
+    }
+
+    .asin-code {
+      font-family: monospace;
+      color: #7c83ff;
+      font-weight: 600;
+    }
+
+    .title-cell {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #ccc;
+    }
+
+    .delta-up   { color: #2ecc71; font-weight: 600; }
+    .delta-down { color: #e74c3c; font-weight: 600; }
+    .delta-zero { color: #888; }
+
+    .amazon-badge {
+      background: #f39c12;
+      color: #000;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .no-data { color: #555; }
+
+    /* LOADING & EMPTY */
+    .status-msg {
+      text-align: center;
+      padding: 60px;
+      color: #555;
+      font-size: 15px;
+    }
+
+    /* SYNC STATUS */
+    #syncStatus {
+      font-size: 12px;
+      color: #888;
+      padding: 4px 10px;
+      background: #12152a;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ ASIN TRACKER</h1>
+  <div class="header-actions">
+    <span id="syncStatus">Not synced yet</span>
+    <button class="btn-success" onclick="syncKeepa()">🔄 Sync Keepa</button>
+    <button class="btn-primary" onclick="toggleAddPanel()">+ Add ASIN</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="number" id="statTotal">—</div>
+      <div class="label">Total ASINs</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="statAmazon">—</div>
+      <div class="label">Amazon Selling</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="statPriceUp">—</div>
+      <div class="label">Price ↑ 30d</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="statSellersDown">—</div>
+      <div class="label">Sellers ↓ 30d</div>
+    </div>
+  </div>
+
+  <!-- ADD PANEL -->
+  <div class="add-panel" id="addPanel">
+    <h3>Add New ASIN</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>ASIN *</label>
+        <input type="text" id="inputAsin" placeholder="B08N5WRWNW" maxlength="10"/>
+      </div>
+      <div class="form-group">
+        <label>Title (optional)</label>
+        <input type="text" id="inputTitle" placeholder="Will auto-fill on sync"/>
+      </div>
+      <div class="form-group">
+        <label>Cost Price ($)</label>
+        <input type="number" id="inputCost" placeholder="0.00" step="0.01"/>
+      </div>
+      <div class="form-group">
+        <label>Weight (lbs)</label>
+        <input type="number" id="inputWeight" placeholder="0.00" step="0.01"/>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <input type="text" id="inputNotes" placeholder="Optional notes"/>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="addAsin()">Add ASIN</button>
+      <button class="btn-sm" onclick="toggleAddPanel()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <span class="filter-label">Filter:</span>
+    <input type="text" id="searchInput" placeholder="Search ASIN or title..." oninput="renderTable()"/>
+    <button class="btn-sm" onclick="filterPriceUp()">Price ↑ 30d</button>
+    <button class="btn-sm" onclick="filterSellersDown()">Sellers ↓ 30d</button>
+    <button class="btn-sm" onclick="clearFilters()">Clear</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy('asin')">ASIN</th>
+          <th onclick="sortBy('title')">Title</th>
+          <th onclick="sortBy('current_price')">Price</th>
+          <th onclick="sortBy('price_delta_30')">Δ Price 30d</th>
+          <th onclick="sortBy('price_delta_90')">Δ Price 90d</th>
+          <th onclick="sortBy('current_rank')">Rank</th>
+          <th onclick="sortBy('rank_delta_30')">Δ Rank 30d</th>
+          <th onclick="sortBy('current_sellers')">Sellers</th>
+          <th onclick="sortBy('seller_delta_30')">Δ Sellers 30d</th>
+          <th onclick="sortBy('current_stock')">Stock</th>
+          <th>Amazon?</th>
+          <th>Cost</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="13" class="status-msg">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const API = "YOUR_RENDER_URL";
+
+  let allAsins = [];
+  let deltas = {};
+  let sortKey = null;
+  let sortDir = 1;
+  let activeFilter = null;
+
+  // -------------------------------
+  // LOAD DATA
+  // -------------------------------
+  async function loadAsins() {
+    try {
+      const res = await fetch(`${API}/asins`);
+      allAsins = await res.json();
+      await loadAllDeltas();
+      updateStats();
+      renderTable();
+    } catch (e) {
+      document.getElementById("tableBody").innerHTML =
+        `<tr><td colspan="13" class="status-msg">Error loading data. Is the API running?</td></tr>`;
+    }
+  }
+
+  async function loadAllDeltas() {
+    const promises = allAsins.map(a =>
+      fetch(`${API}/deltas/${a.asin}`)
+        .then(r => r.json())
+        .then(d => { deltas[a.asin] = d; })
+        .catch(() => {})
+    );
+    await Promise.all(promises);
+  }
+
+  // -------------------------------
+  // STATS
+  // -------------------------------
+  function updateStats() {
+    document.getElementById("statTotal").textContent = allAsins.length;
+
+    const amazonCount = allAsins.filter(a => a.amazon_selling).length;
+    document.getElementById("statAmazon").textContent = amazonCount;
+
+    const priceUp = allAsins.filter(a => {
+      const d = deltas[a.asin];
+      return d && d.price_delta_30 > 0;
+    }).length;
+    document.getElementById("statPriceUp").textContent = priceUp;
+
+    const sellersDown = allAsins.filter(a => {
+      const d = deltas[a.asin];
+      return d && d.seller_delta_30 < 0;
+    }).length;
+    document.getElementById("statSellersDown").textContent = sellersDown;
+  }
+
+  // -------------------------------
+  // RENDER TABLE
+  // -------------------------------
+  function renderTable() {
+    const search = document.getElementById("searchInput").value.toLowerCase();
+
+    let rows = allAsins.map(a => ({
+      ...a,
+      price_delta_30:  deltas[a.asin]?.price_delta_30  ?? null,
+      price_delta_90:  deltas[a.asin]?.price_delta_90  ?? null,
+      rank_delta_30:   deltas[a.asin]?.rank_delta_30   ?? null,
+      seller_delta_30: deltas[a.asin]?.seller_delta_30 ?? null,
+    }));
+
+    // Search filter
+    if (search) {
+      rows = rows.filter(r =>
+        r.asin.toLowerCase().includes(search) ||
+        (r.title || "").toLowerCase().includes(search)
+      );
+    }
+
+    // Active filter
+    if (activeFilter === "priceUp") {
+      rows = rows.filter(r => r.price_delta_30 > 0);
+    } else if (activeFilter === "sellersDown") {
+      rows = rows.filter(r => r.seller_delta_30 < 0);
+    }
+
+    // Sort
+    if (sortKey) {
+      rows.sort((a, b) => {
+        const av = a[sortKey] ?? -Infinity;
+        const bv = b[sortKey] ?? -Infinity;
+        return typeof av === "string"
+          ? av.localeCompare(bv) * sortDir
+          : (av - bv) * sortDir;
+      });
+    }
+
+    if (rows.length === 0) {
+      document.getElementById("tableBody").innerHTML =
+        `<tr><td colspan="13" class="status-msg">No ASINs found.</td></tr>`;
+      return;
+    }
+
+    document.getElementById("tableBody").innerHTML = rows.map(r => `
+      <tr>
+        <td class="asin-code">${r.asin}</td>
+        <td class="title-cell" title="${r.title || ''}">${r.title || '<span class="no-data">—</span>'}</td>
+        <td>${r.current_price != null ? '$' + Number(r.current_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
+        <td class="${deltaClass(r.price_delta_30)}">${formatDelta(r.price_delta_30, '$')}</td>
+        <td class="${deltaClass(r.price_delta_90)}">${formatDelta(r.price_delta_90, '$')}</td>
+        <td>${r.current_rank != null ? Number(r.current_rank).toLocaleString() : '<span class="no-data">—</span>'}</td>
+        <td class="${deltaClass(r.rank_delta_30, true)}">${formatDelta(r.rank_delta_30)}</td>
+        <td>${r.current_sellers ?? '<span class="no-data">—</span>'}</td>
+        <td class="${deltaClass(r.seller_delta_30, true)}">${formatDelta(r.seller_delta_30)}</td>
+        <td>${r.current_stock ?? '<span class="no-data">—</span>'}</td>
+        <td>${r.amazon_selling ? '<span class="amazon-badge">AMZ</span>' : '<span class="no-data">—</span>'}</td>
+        <td>${r.cost != null ? '$' + Number(r.cost).toFixed(2) : '<span class="no-data">—</span>'}</td>
+        <td><button class="btn-danger" onclick="deleteAsin('${r.asin}')">Remove</button></td>
+      </tr>
+    `).join("");
+  }
+
+  // -------------------------------
+  // DELTA HELPERS
+  // -------------------------------
+  function deltaClass(val, invertLogic = false) {
+    if (val === null || val === undefined) return "no-data";
+    if (val === 0) return "delta-zero";
+    const positive = val > 0;
+    if (invertLogic) return positive ? "delta-down" : "delta-up";
+    return positive ? "delta-up" : "delta-down";
+  }
+
+  function formatDelta(val, prefix = "") {
+    if (val === null || val === undefined) return '<span class="no-data">—</span>';
+    const sign = val > 0 ? "+" : "";
+    return `${sign}${prefix}${Number(val).toFixed(2)}`;
+  }
+
+  // -------------------------------
+  // SORT
+  // -------------------------------
+  function sortBy(key) {
+    if (sortKey === key) sortDir *= -1;
+    else { sortKey = key; sortDir = 1; }
+    renderTable();
+  }
+
+  // -------------------------------
+  // FILTERS
+  // -------------------------------
+  function filterPriceUp() { activeFilter = "priceUp"; renderTable(); }
+  function filterSellersDown() { activeFilter = "sellersDown"; renderTable(); }
+  function clearFilters() {
+    activeFilter = null;
+    document.getElementById("searchInput").value = "";
+    renderTable();
+  }
+
+  // -------------------------------
+  // ADD ASIN
+  // -------------------------------
+  function toggleAddPanel() {
+    const panel = document.getElementById("addPanel");
+    panel.classList.toggle("open");
+  }
+
+  async function addAsin() {
+    const asin = document.getElementById("inputAsin").value.trim().toUpperCase();
+    if (!asin || asin.length !== 10) {
+      alert("Please enter a valid 10-character ASIN.");
+      return;
+    }
+
+    const payload = {
+      asin,
+      title:  document.getElementById("inputTitle").value.trim(),
+      cost:   parseFloat(document.getElementById("inputCost").value) || null,
+      weight: parseFloat(document.getElementById("inputWeight").value) || null,
+      notes:  document.getElementById("inputNotes").value.trim()
+    };
+
+    try {
+      const res = await fetch(`${API}/asins`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.status === 409) {
+        alert("This ASIN already exists in your tracker.");
+        return;
+      }
+
+      if (!res.ok) throw new Error("Failed to add ASIN");
+
+      document.getElementById("inputAsin").value = "";
+      document.getElementById("inputTitle").value = "";
+      document.getElementById("inputCost").value = "";
+      document.getElementById("inputWeight").value = "";
+      document.getElementById("inputNotes").value = "";
+
+      toggleAddPanel();
+      await loadAsins();
+    } catch (e) {
+      alert("Error adding ASIN: " + e.message);
+    }
+  }
+
+  // -------------------------------
+  // DELETE ASIN
+  // -------------------------------
+  async function deleteAsin(asin) {
+    if (!confirm(`Remove ${asin} from your tracker?`)) return;
+    try {
+      await fetch(`${API}/asins/${asin}`, { method: "DELETE" });
+      await loadAsins();
+    } catch (e) {
+      alert("Error removing ASIN.");
+    }
+  }
+
+  // -------------------------------
+  // SYNC KEEPA
+  // -------------------------------
+  async function syncKeepa() {
+    const status = document.getElementById("syncStatus");
+    status.textContent = "Syncing...";
+    try {
+      const res = await fetch(`${API}/sync`, { method: "POST" });
+      const data = await res.json();
+      status.textContent = `Last sync: ${new Date().toLocaleTimeString()} (${data.updated} updated)`;
+      await loadAsins();
+    } catch (e) {
+      status.textContent = "Sync failed";
+      alert("Sync error: " + e.message);
+    }
+  }
+
+  // -------------------------------
+  // INIT
+  // -------------------------------
+  loadAsins();
+</script>
+</body>
+</html>
