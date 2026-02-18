@@ -2,7 +2,7 @@
 # ASIN TRACKER - BACKEND API
 # =======================================
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import psycopg2
 import psycopg2.extras
@@ -274,9 +274,17 @@ def get_deltas(asin):
 # -------------------------------
 # HEALTH CHECK
 # -------------------------------
-@app.route("/", methods=["GET"])
+@app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok", "message": "ASIN Tracker API is running"})
+
+
+# -------------------------------
+# SERVE FRONTEND
+# -------------------------------
+@app.route("/", methods=["GET"])
+def frontend():
+    return send_from_directory(".", "index.html")
 
 
 # -------------------------------
