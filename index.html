@@ -20,14 +20,8 @@
       --muted: #888;
     }
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* ---- NAV ---- */
     nav {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -37,55 +31,14 @@
       height: 56px;
       gap: 8px;
     }
-
-    .nav-brand {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--accent);
-      margin-right: 24px;
-      letter-spacing: 1px;
-    }
-
-    .nav-btn {
-      padding: 7px 16px;
-      border-radius: 6px;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-
+    .nav-brand { font-size: 18px; font-weight: 700; color: var(--accent); margin-right: 24px; letter-spacing: 1px; }
+    .nav-btn { padding: 7px 16px; border-radius: 6px; border: none; background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
     .nav-btn:hover { color: var(--text); background: var(--border); }
     .nav-btn.active { color: var(--accent); background: rgba(124,131,255,0.12); }
+    .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    #syncStatus { font-size: 12px; color: var(--muted); background: #12152a; padding: 4px 12px; border-radius: 6px; }
 
-    .nav-right {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    #syncStatus {
-      font-size: 12px;
-      color: var(--muted);
-      background: #12152a;
-      padding: 4px 12px;
-      border-radius: 6px;
-    }
-
-    /* ---- BUTTONS ---- */
-    .btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: opacity 0.2s;
-    }
+    .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: opacity 0.2s; }
     .btn:hover { opacity: 0.85; }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-success { background: var(--green); color: #fff; }
@@ -94,418 +47,86 @@
     .btn-sm      { padding: 4px 10px; font-size: 11px; }
     .btn-orange  { background: var(--orange); color: #000; }
 
-    /* ---- PAGES ---- */
     .page { display: none; padding: 28px 32px; max-width: 1500px; margin: 0 auto; }
     .page.active { display: block; }
 
-    /* ---- STAT CARDS ---- */
-    .stats-bar {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 14px;
-      margin-bottom: 24px;
-    }
+    .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+    .stat-card .num { font-size: 26px; font-weight: 700; color: var(--accent); }
+    .stat-card .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-    }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; }
+    .panel h3 { font-size: 14px; color: var(--muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .stat-card .num {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--accent);
-    }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 130px; }
+    .form-group label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group select { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: var(--text); font-size: 13px; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+    .form-actions { display: flex; gap: 10px; margin-top: 16px; }
 
-    .stat-card .lbl {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    /* ---- PANELS ---- */
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px 24px;
-      margin-bottom: 20px;
-    }
-
-    .panel h3 {
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* ---- FORMS ---- */
-    .form-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-      min-width: 130px;
-    }
-
-    .form-group label {
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .form-group input, .form-group select {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-size: 13px;
-    }
-
-    .form-group input:focus, .form-group select:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    /* ---- TABLE ---- */
-    .table-wrap {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    thead th {
-      background: #12152a;
-      padding: 11px 14px;
-      text-align: left;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--accent);
-      white-space: nowrap;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      user-select: none;
-    }
-
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { background: #12152a; padding: 11px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); white-space: nowrap; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
     thead th:hover { background: #1a1d3a; }
-
-    tbody tr {
-      border-bottom: 1px solid #1e2138;
-      transition: background 0.15s;
-    }
-
+    tbody tr { border-bottom: 1px solid #1e2138; transition: background 0.15s; }
     tbody tr:hover { background: #1e2240; }
+    tbody td { padding: 10px 14px; white-space: nowrap; }
 
-    tbody td {
-      padding: 10px 14px;
-      white-space: nowrap;
-    }
-
-    .asin-link {
-      font-family: monospace;
-      color: var(--accent);
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .title-cell {
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: #ccc;
-    }
-
+    .asin-link { font-family: monospace; color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: underline; }
+    .title-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; color: #ccc; }
     .delta-up   { color: var(--green); font-weight: 600; }
     .delta-down { color: var(--red); font-weight: 600; }
     .delta-zero { color: var(--muted); }
     .no-data    { color: #444; }
-
-    .badge-amz {
-      background: var(--orange);
-      color: #000;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-
+    .badge-amz  { background: var(--orange); color: #000; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
     .roi-positive { color: var(--green); font-weight: 700; }
     .roi-negative { color: var(--red); font-weight: 700; }
+    .status-msg { text-align: center; padding: 50px; color: #444; font-size: 14px; }
 
-    .status-msg {
-      text-align: center;
-      padding: 50px;
-      color: #444;
-      font-size: 14px;
-    }
-
-    /* ---- ADD PANEL TOGGLE ---- */
     .collapsible { display: none; }
     .collapsible.open { display: block; }
 
-    /* ---- FILTER BUILDER ---- */
-    .filter-builder {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
+    .filter-builder { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .filter-row { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+    .filter-row label { font-size: 12px; color: var(--text); flex: 1; }
+    .filter-row select { background: var(--surface); border: 1px solid var(--border); border-radius: 5px; color: var(--text); font-size: 12px; padding: 4px 8px; }
 
-    .filter-row {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .detail-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .detail-title { font-size: 22px; font-weight: 700; color: var(--accent); }
+    .detail-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-    .filter-row label {
-      font-size: 12px;
-      color: var(--text);
-      flex: 1;
-    }
+    .product-image-wrap { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 24px; }
+    .product-info { flex: 1; }
+    .product-image { width: 120px; height: 120px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); background: #fff; padding: 6px; }
 
-    .filter-row select {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      color: var(--text);
-      font-size: 12px;
-      padding: 4px 8px;
-    }
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .metric-card .m-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .metric-card .m-value { font-size: 20px; font-weight: 700; color: var(--text); }
 
-    /* ---- DETAIL PAGE ---- */
-    .detail-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
+    .delta-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .delta-table th { background: #12152a; padding: 10px 14px; text-align: left; font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    .delta-table td { padding: 10px 14px; border-bottom: 1px solid #1e2138; }
 
-    .detail-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent);
-    }
+    .chart-container { position: relative; height: 280px; margin-bottom: 8px; }
+    .period-btns { display: flex; gap: 8px; margin-bottom: 16px; }
+    .period-btn { padding: 5px 14px; border-radius: 5px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .period-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-    .detail-subtitle {
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .metric-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 16px;
-    }
-
-    .metric-card .m-label {
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .metric-card .m-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .metric-card .m-delta {
-      font-size: 12px;
-      margin-top: 4px;
-    }
-
-    .delta-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-/* ---- SOURCES ---- */
-    .source-row {
-      display: grid;
-      grid-template-columns: 1fr 2fr 100px 80px auto;
-      gap: 10px;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .source-row { display: grid; grid-template-columns: 1fr 2fr 100px 80px auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
     .source-row:last-child { border-bottom: none; }
-
-    .source-row input {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 7px 10px;
-      color: var(--text);
-      font-size: 12px;
-      width: 100%;
-    }
-
-    .source-row input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .source-link {
-      color: var(--accent);
-      font-size: 12px;
-      text-decoration: none;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      display: block;
-    }
-
+    .source-row input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 12px; width: 100%; }
+    .source-row input:focus { outline: none; border-color: var(--accent); }
+    .source-link { color: var(--accent); font-size: 12px; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
     .source-link:hover { text-decoration: underline; }
 
-    .product-image {
-      width: 120px;
-      height: 120px;
-      object-fit: contain;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #fff;
-      padding: 6px;
-    }
-
-    .product-image-wrap {
-      display: flex;
-      align-items: flex-start;
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .product-info {
-      flex: 1;
-    }
-    
-    .delta-table th {
-      background: #12152a;
-      padding: 10px 14px;
-      text-align: left;
-      font-size: 11px;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .delta-table td {
-      padding: 10px 14px;
-      border-bottom: 1px solid #1e2138;
-    }
-
-    .chart-container {
-      position: relative;
-      height: 280px;
-      margin-bottom: 8px;
-    }
-
-    .period-btns {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .period-btn {
-      padding: 5px 14px;
-      border-radius: 5px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .period-btn.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    /* ---- SETTINGS ---- */
-    .settings-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .setting-item {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .setting-item label {
-      font-size: 12px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .setting-item input {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 14px;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .setting-item input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .setting-item .hint {
-      font-size: 11px;
-      color: #555;
-    }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .setting-item { display: flex; flex-direction: column; gap: 6px; }
+    .setting-item label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .setting-item input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; color: var(--text); font-size: 14px; }
+    .setting-item input:focus { outline: none; border-color: var(--accent); }
+    .setting-item .hint { font-size: 11px; color: #555; }
   </style>
 </head>
 <body>
@@ -524,7 +145,6 @@
 
 <!-- ==================== DASHBOARD ==================== -->
 <div class="page active" id="page-dashboard">
-
   <div class="stats-bar">
     <div class="stat-card"><div class="num" id="statTotal">—</div><div class="lbl">Total ASINs</div></div>
     <div class="stat-card"><div class="num" id="statAmazon">—</div><div class="lbl">Amazon Selling</div></div>
@@ -533,7 +153,6 @@
     <div class="stat-card"><div class="num" id="statRoiPos">—</div><div class="lbl">Positive ROI</div></div>
   </div>
 
-  <!-- ADD ASIN -->
   <div class="panel" style="margin-bottom:16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <span style="font-weight:600;font-size:14px;">Manage ASINs</span>
@@ -561,16 +180,13 @@
     </div>
   </div>
 
-  <!-- SEARCH -->
   <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center;">
     <input type="text" id="dashSearch" placeholder="Search ASIN or title..."
-      style="background:var(--surface);border:1px solid var(--border);border-radius:6px;
-             padding:8px 14px;color:var(--text);font-size:13px;width:260px;"
+      style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 14px;color:var(--text);font-size:13px;width:260px;"
       oninput="renderDashboard()"/>
     <button class="btn btn-muted btn-sm" onclick="document.getElementById('dashSearch').value='';renderDashboard()">Clear</button>
   </div>
 
-  <!-- DASHBOARD TABLE -->
   <div class="table-wrap">
     <table>
       <thead>
@@ -594,14 +210,13 @@
     </table>
   </div>
 </div>
+<!-- END DASHBOARD -->
 
 <!-- ==================== VELOCITY FILTER ==================== -->
 <div class="page" id="page-velocity">
-
   <div class="panel">
     <h3>Filter Builder — combine any rules</h3>
-    <div class="filter-builder" id="filterBuilder">
-
+    <div class="filter-builder">
       <div class="filter-row">
         <label>Buy Box Price</label>
         <select id="f_price_bb_dir">
@@ -615,7 +230,6 @@
           <option value="180">180d</option>
         </select>
       </div>
-
       <div class="filter-row">
         <label>Lowest New Price</label>
         <select id="f_price_new_dir">
@@ -629,7 +243,6 @@
           <option value="180">180d</option>
         </select>
       </div>
-
       <div class="filter-row">
         <label>Seller Count</label>
         <select id="f_sellers_dir">
@@ -643,7 +256,6 @@
           <option value="180">180d</option>
         </select>
       </div>
-
       <div class="filter-row">
         <label>Sales Rank</label>
         <select id="f_rank_dir">
@@ -657,7 +269,6 @@
           <option value="180">180d</option>
         </select>
       </div>
-
       <div class="filter-row">
         <label>Amazon Selling</label>
         <select id="f_amazon">
@@ -666,7 +277,6 @@
           <option value="no">No — Amazon out</option>
         </select>
       </div>
-
       <div class="filter-row">
         <label>ROI</label>
         <select id="f_roi">
@@ -678,7 +288,6 @@
           <option value="50">≥ 50%</option>
         </select>
       </div>
-
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-primary" onclick="runVelocityFilter()">Run Filter</button>
@@ -712,14 +321,17 @@
     </table>
   </div>
 </div>
+<!-- END VELOCITY -->
 
 <!-- ==================== ASIN DETAIL ==================== -->
 <div class="page" id="page-detail">
+
   <div style="margin-bottom:16px;">
     <button class="btn btn-muted btn-sm" onclick="goBack()">← Back</button>
   </div>
+
   <div class="product-image-wrap">
-    <img id="detailImage" class="product-image" src="" alt="Product" 
+    <img id="detailImage" class="product-image" src="" alt="Product"
          style="display:none;" onerror="this.style.display='none'"/>
     <div class="product-info">
       <div class="detail-header">
@@ -734,7 +346,6 @@
     </div>
   </div>
 
-  <!-- EDIT PANEL -->
   <div class="panel collapsible" id="editPanel" style="margin-bottom:20px;">
     <h3>Override Per-ASIN Values</h3>
     <div class="form-row">
@@ -761,10 +372,8 @@
     </div>
   </div>
 
-  <!-- METRICS -->
   <div class="metrics-grid" id="detailMetrics"></div>
 
-  <!-- PERIOD SELECTOR -->
   <div class="period-btns">
     <button class="period-btn active" onclick="setDetailPeriod(30, this)">30d</button>
     <button class="period-btn" onclick="setDetailPeriod(90, this)">90d</button>
@@ -772,7 +381,6 @@
     <button class="period-btn" onclick="setDetailPeriod(365, this)">1yr</button>
   </div>
 
-  <!-- CHARTS -->
   <div class="panel">
     <h3>Buy Box Price & Lowest New Price</h3>
     <div class="chart-container"><canvas id="chartPrice"></canvas></div>
@@ -788,7 +396,6 @@
     <div class="chart-container"><canvas id="chartSellers"></canvas></div>
   </div>
 
-  <!-- DELTA TABLE -->
   <div class="panel">
     <h3>Delta Summary</h3>
     <table class="delta-table">
@@ -803,11 +410,7 @@
       <tbody id="deltaTableBody"></tbody>
     </table>
   </div>
-  </table>
-    </div>
-  </div>
 
-  <!-- SOURCES -->
   <div class="panel">
     <h3>Purchase Sources</h3>
     <div id="sourcesList"></div>
@@ -833,35 +436,8 @@
   </div>
 
 </div>
+<!-- END DETAIL -->
 
-<!-- ==================== SETTINGS ==================== -->
-
-</div>
-<!-- SOURCES -->
-  <div class="panel">
-    <h3>Purchase Sources</h3>
-    <div id="sourcesList"></div>
-    <div style="margin-top:16px;">
-      <button class="btn btn-primary btn-sm" onclick="toggleAddSource()">+ Add Source</button>
-    </div>
-    <div class="collapsible" id="addSourcePanel" style="margin-top:16px;">
-      <div class="source-row" style="font-size:11px;color:var(--muted);font-weight:600;">
-        <span>SUPPLIER NAME</span>
-        <span>URL</span>
-        <span>COST ($)</span>
-        <span>NOTES</span>
-        <span></span>
-      </div>
-      <div class="source-row">
-        <input type="text" id="newSupplier" placeholder="e.g. Walmart"/>
-        <input type="text" id="newUrl" placeholder="https://..."/>
-        <input type="number" id="newSourceCost" step="0.01" placeholder="0.00"/>
-        <input type="text" id="newSourceNotes" placeholder="Optional"/>
-        <button class="btn btn-success btn-sm" onclick="addSource()">Add</button>
-      </div>
-    </div>
-  </div>
-  
 <!-- ==================== SETTINGS ==================== -->
 <div class="page" id="page-settings">
   <div class="panel">
@@ -906,52 +482,28 @@
     </p>
   </div>
 </div>
+<!-- END SETTINGS -->
 
 <script>
 const API = "https://asin-tracker.onrender.com";
 
-// ============================================================
-// STATE
-// ============================================================
-let allAsins   = [];
-let allDeltas  = {};
-let settings   = { prep_fee: 0, shipping_rate: 0, fba_fee: 3.22 };
-let dashSortKey = null;
-let dashSortDir = 1;
+let allAsins      = [];
+let allDeltas     = {};
+let settings      = { prep_fee: 0, shipping_rate: 0, fba_fee: 3.22 };
+let dashSortKey   = null;
+let dashSortDir   = 1;
 let currentDetailAsin = null;
-let detailPeriod = 30;
-let previousPage = "dashboard";
+let detailPeriod  = 30;
+let previousPage  = "dashboard";
 let priceChart = null, rankChart = null, sellersChart = null;
 
-// ============================================================
-// REFERRAL FEE MAP
-// ============================================================
 const REFERRAL_FEES = {
-  "baby": 0.08,
-  "beauty": 0.08,
-  "clothing": 0.17,
-  "apparel": 0.17,
-  "grocery": 0.08,
-  "food": 0.08,
-  "health": 0.08,
-  "home": 0.15,
-  "kitchen": 0.15,
-  "office": 0.15,
-  "pet": 0.15,
-  "sports": 0.15,
-  "outdoors": 0.15,
-  "tools": 0.15,
-  "improvement": 0.15,
-  "toys": 0.15,
-  "games": 0.15,
-  "arts": 0.15,
-  "crafts": 0.15,
-  "automotive": 0.12,
-  "industrial": 0.12,
-  "musical": 0.15,
-  "patio": 0.15,
-  "lawn": 0.15,
-  "garden": 0.15,
+  "baby": 0.08, "beauty": 0.08, "clothing": 0.17, "apparel": 0.17,
+  "grocery": 0.08, "food": 0.08, "health": 0.08, "home": 0.15,
+  "kitchen": 0.15, "office": 0.15, "pet": 0.15, "sports": 0.15,
+  "outdoors": 0.15, "tools": 0.15, "improvement": 0.15, "toys": 0.15,
+  "games": 0.15, "arts": 0.15, "crafts": 0.15, "automotive": 0.12,
+  "industrial": 0.12, "musical": 0.15, "patio": 0.15, "lawn": 0.15, "garden": 0.15,
 };
 
 function getReferralFee(category) {
@@ -963,14 +515,10 @@ function getReferralFee(category) {
   return 0.15;
 }
 
-// ============================================================
-// ROI CALCULATION
-// ============================================================
 function calcROI(asin) {
   const price = parseFloat(asin.current_price || asin.current_new_price || 0);
   const cost  = parseFloat(asin.cost || 0);
   if (!price || !cost) return null;
-
   const prepFee      = parseFloat(settings.prep_fee || 0);
   const shippingRate = parseFloat(settings.shipping_rate || 0);
   const weight       = parseFloat(asin.weight || 0);
@@ -978,18 +526,13 @@ function calcROI(asin) {
   const referralPct  = asin.referral_fee_override
     ? parseFloat(asin.referral_fee_override) / 100
     : getReferralFee(asin.category);
-
-  const trueCost    = cost + prepFee + (weight * shippingRate);
-  const amazonFees  = (price * referralPct) + fbaFee;
-  const netProfit   = price - amazonFees - trueCost;
-  const roi         = (netProfit / trueCost) * 100;
-
+  const trueCost   = cost + prepFee + (weight * shippingRate);
+  const amazonFees = (price * referralPct) + fbaFee;
+  const netProfit  = price - amazonFees - trueCost;
+  const roi        = (netProfit / trueCost) * 100;
   return { roi, netProfit, trueCost, amazonFees };
 }
 
-// ============================================================
-// NAV
-// ============================================================
 function showPage(name) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
@@ -1005,16 +548,13 @@ function goBack() {
   showPage(previousPage === "detail" ? "dashboard" : previousPage);
 }
 
-// ============================================================
-// LOAD DATA
-// ============================================================
 async function loadAll() {
   await Promise.all([loadSettings(), loadAsins()]);
 }
 
 async function loadSettings() {
   try {
-    const res = await fetch(`${API}/settings`);
+    const res  = await fetch(`${API}/settings`);
     const data = await res.json();
     settings = { ...settings, ...data };
     document.getElementById("sPrepFee").value      = settings.prep_fee || "";
@@ -1026,7 +566,7 @@ async function loadSettings() {
 async function loadAsins() {
   try {
     const res = await fetch(`${API}/asins`);
-    allAsins = await res.json();
+    allAsins  = await res.json();
     await loadAllDeltas();
     updateStats();
     renderDashboard();
@@ -1046,9 +586,6 @@ async function loadAllDeltas() {
   await Promise.all(promises);
 }
 
-// ============================================================
-// STATS
-// ============================================================
 function updateStats() {
   document.getElementById("statTotal").textContent = allAsins.length;
   document.getElementById("statAmazon").textContent =
@@ -1061,9 +598,6 @@ function updateStats() {
     allAsins.filter(a => { const r = calcROI(a); return r && r.roi > 0; }).length;
 }
 
-// ============================================================
-// DASHBOARD
-// ============================================================
 function dashSort(key) {
   if (dashSortKey === key) dashSortDir *= -1;
   else { dashSortKey = key; dashSortDir = 1; }
@@ -1072,44 +606,33 @@ function dashSort(key) {
 
 function renderDashboard() {
   const search = (document.getElementById("dashSearch").value || "").toLowerCase();
-
-  let rows = allAsins.map(a => ({
-    ...a,
-    roi: calcROI(a)?.roi ?? null
-  }));
-
+  let rows = allAsins.map(a => ({ ...a, roi: calcROI(a)?.roi ?? null }));
   if (search) {
     rows = rows.filter(r =>
       r.asin.toLowerCase().includes(search) ||
       (r.title || "").toLowerCase().includes(search)
     );
   }
-
   if (dashSortKey) {
     rows.sort((a, b) => {
       const av = a[dashSortKey] ?? -Infinity;
       const bv = b[dashSortKey] ?? -Infinity;
-      return typeof av === "string"
-        ? av.localeCompare(bv) * dashSortDir
-        : (av - bv) * dashSortDir;
+      return typeof av === "string" ? av.localeCompare(bv) * dashSortDir : (av - bv) * dashSortDir;
     });
   }
-
   if (!rows.length) {
     document.getElementById("dashBody").innerHTML =
       `<tr><td colspan="11" class="status-msg">No ASINs found.</td></tr>`;
     return;
   }
-
   document.getElementById("dashBody").innerHTML = rows.map(r => {
     const roiCalc = calcROI(r);
-    const roiStr = roiCalc
-      ? `<span class="${roiCalc.roi >= 0 ? 'roi-positive' : 'roi-negative'}">${roiCalc.roi.toFixed(1)}%</span>`
+    const roiStr  = roiCalc
+      ? `<span class="${roiCalc.roi >= 0 ? 'roi-positive':'roi-negative'}">${roiCalc.roi.toFixed(1)}%</span>`
       : `<span class="no-data">—</span>`;
-
     return `<tr>
       <td><span class="asin-link" onclick="openDetail('${r.asin}')">${r.asin}</span></td>
-      <td class="title-cell" title="${r.title||''}">${r.title || '<span class="no-data">—</span>'}</td>
+      <td class="title-cell" title="${r.title||''}">${r.title||'<span class="no-data">—</span>'}</td>
       <td>${r.current_price != null ? '$'+Number(r.current_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
       <td>${r.current_new_price != null ? '$'+Number(r.current_new_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
       <td>${r.current_rank != null ? Number(r.current_rank).toLocaleString() : '<span class="no-data">—</span>'}</td>
@@ -1126,19 +649,13 @@ function renderDashboard() {
   }).join("");
 }
 
-// ============================================================
-// ADD ASIN
-// ============================================================
 function toggleAdd() {
   document.getElementById("addPanel").classList.toggle("open");
 }
 
 async function addAsin() {
   const asin = document.getElementById("iAsin").value.trim().toUpperCase();
-  if (!asin || asin.length !== 10) {
-    alert("Please enter a valid 10-character ASIN.");
-    return;
-  }
+  if (!asin || asin.length !== 10) { alert("Please enter a valid 10-character ASIN."); return; }
   try {
     const res = await fetch(`${API}/asins`, {
       method: "POST",
@@ -1151,35 +668,26 @@ async function addAsin() {
     });
     if (res.status === 409) { alert("ASIN already exists."); return; }
     if (!res.ok) { const e = await res.json(); alert(e.error); return; }
-    document.getElementById("iAsin").value = "";
-    document.getElementById("iCost").value = "";
+    document.getElementById("iAsin").value  = "";
+    document.getElementById("iCost").value  = "";
     document.getElementById("iNotes").value = "";
     toggleAdd();
     await loadAsins();
   } catch(e) { alert("Error: " + e.message); }
 }
 
-// ============================================================
-// DELETE ASIN
-// ============================================================
 async function deleteAsin(asin) {
   if (!confirm(`Remove ${asin} from tracker?`)) return;
   await fetch(`${API}/asins/${asin}`, { method: "DELETE" });
   await loadAsins();
 }
 
-// ============================================================
-// SYNC KEEPA
-// ============================================================
 async function syncKeepa() {
   const status = document.getElementById("syncStatus");
   status.textContent = "Syncing...";
   try {
     const res  = await fetch(`${API}/sync`, { method: "POST" });
     const data = await res.json();
-    if (data.errors && data.errors.length > 0) {
-      console.warn("Sync errors:", data.errors);
-    }
     status.textContent = `Last sync: ${new Date().toLocaleTimeString()} (${data.updated} updated)`;
     await loadAsins();
   } catch(e) {
@@ -1188,66 +696,51 @@ async function syncKeepa() {
   }
 }
 
-// ============================================================
-// VELOCITY FILTER
-// ============================================================
 function getDeltaForFilter(asin, metric, period) {
   const d = allDeltas[asin];
   if (!d) return null;
-  const key = `${metric}_delta_${period}`;
-  return d[key] ?? null;
+  return d[`${metric}_delta_${period}`] ?? null;
 }
 
 function runVelocityFilter() {
-  const priceBBDir    = document.getElementById("f_price_bb_dir").value;
-  const priceBBPeriod = document.getElementById("f_price_bb_period").value;
-  const priceNewDir   = document.getElementById("f_price_new_dir").value;
-  const priceNewPeriod= document.getElementById("f_price_new_period").value;
-  const sellersDir    = document.getElementById("f_sellers_dir").value;
-  const sellersPeriod = document.getElementById("f_sellers_period").value;
-  const rankDir       = document.getElementById("f_rank_dir").value;
-  const rankPeriod    = document.getElementById("f_rank_period").value;
-  const amazonFilter  = document.getElementById("f_amazon").value;
-  const roiFilter     = document.getElementById("f_roi").value;
+  const priceBBDir     = document.getElementById("f_price_bb_dir").value;
+  const priceBBPeriod  = document.getElementById("f_price_bb_period").value;
+  const priceNewDir    = document.getElementById("f_price_new_dir").value;
+  const priceNewPeriod = document.getElementById("f_price_new_period").value;
+  const sellersDir     = document.getElementById("f_sellers_dir").value;
+  const sellersPeriod  = document.getElementById("f_sellers_period").value;
+  const rankDir        = document.getElementById("f_rank_dir").value;
+  const rankPeriod     = document.getElementById("f_rank_period").value;
+  const amazonFilter   = document.getElementById("f_amazon").value;
+  const roiFilter      = document.getElementById("f_roi").value;
 
   let results = allAsins.filter(a => {
-    // Buy Box price direction
     if (priceBBDir) {
       const d = getDeltaForFilter(a.asin, "price", priceBBPeriod);
       if (d === null) return false;
       if (priceBBDir === "up"   && d <= 0) return false;
       if (priceBBDir === "down" && d >= 0) return false;
     }
-
-    // Lowest new price direction
     if (priceNewDir) {
       const d = getDeltaForFilter(a.asin, "new_price", priceNewPeriod);
       if (d === null) return false;
       if (priceNewDir === "up"   && d <= 0) return false;
       if (priceNewDir === "down" && d >= 0) return false;
     }
-
-    // Sellers
     if (sellersDir) {
       const d = getDeltaForFilter(a.asin, "seller", sellersPeriod);
       if (d === null) return false;
       if (sellersDir === "up"   && d <= 0) return false;
       if (sellersDir === "down" && d >= 0) return false;
     }
-
-    // Rank (lower = better)
     if (rankDir) {
       const d = getDeltaForFilter(a.asin, "rank", rankPeriod);
       if (d === null) return false;
       if (rankDir === "down" && d >= 0) return false;
       if (rankDir === "up"   && d <= 0) return false;
     }
-
-    // Amazon
     if (amazonFilter === "yes" && !a.amazon_selling) return false;
     if (amazonFilter === "no"  &&  a.amazon_selling) return false;
-
-    // ROI
     if (roiFilter) {
       const r = calcROI(a);
       if (!r) return false;
@@ -1255,7 +748,6 @@ function runVelocityFilter() {
       if (roiFilter === "neg" && r.roi >= 0) return false;
       if (!isNaN(roiFilter) && r.roi < parseFloat(roiFilter)) return false;
     }
-
     return true;
   });
 
@@ -1271,10 +763,9 @@ function runVelocityFilter() {
   document.getElementById("velocityBody").innerHTML = results.map(r => {
     const d = allDeltas[r.asin] || {};
     const roiCalc = calcROI(r);
-    const roiStr = roiCalc
+    const roiStr  = roiCalc
       ? `<span class="${roiCalc.roi >= 0 ? 'roi-positive':'roi-negative'}">${roiCalc.roi.toFixed(1)}%</span>`
       : `<span class="no-data">—</span>`;
-
     return `<tr>
       <td><span class="asin-link" onclick="openDetail('${r.asin}')">${r.asin}</span></td>
       <td class="title-cell" title="${r.title||''}">${r.title||'<span class="no-data">—</span>'}</td>
@@ -1300,9 +791,6 @@ function clearVelocityFilter() {
   document.getElementById("velocityCount").textContent = "";
 }
 
-// ============================================================
-// ASIN DETAIL
-// ============================================================
 async function openDetail(asin) {
   currentDetailAsin = asin;
   detailPeriod = 30;
@@ -1314,114 +802,78 @@ async function openDetail(asin) {
   const a = allAsins.find(x => x.asin === asin);
   if (!a) return;
 
-  document.getElementById("detailAsin").textContent = asin;
+  document.getElementById("detailAsin").textContent  = asin;
   document.getElementById("detailTitle").textContent = a.title || "No title yet — sync to populate";
 
-  // Product image
   const imgEl = document.getElementById("detailImage");
   if (a.image_url) {
     imgEl.src = a.image_url;
     imgEl.style.display = "block";
   } else {
-    // Try standard Amazon image URL as fallback
     imgEl.src = `https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=${asin}&Format=_SL160_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1`;
     imgEl.style.display = "block";
   }
 
-  // Load sources
-  await loadSources(asin);
-
-  // Pre-fill edit panel
   document.getElementById("editCost").value     = a.cost || "";
   document.getElementById("editFba").value      = a.fba_fee || "";
   document.getElementById("editReferral").value = a.referral_fee_override || "";
   document.getElementById("editNotes").value    = a.notes || "";
 
-  // Metrics
+  document.getElementById("editPanel").classList.remove("open");
+  document.getElementById("addSourcePanel").classList.remove("open");
+
   const roiCalc = calcROI(a);
   const d = allDeltas[asin] || {};
 
   document.getElementById("detailMetrics").innerHTML = `
-    <div class="metric-card">
-      <div class="m-label">Buy Box Price</div>
-      <div class="m-value">${a.current_price != null ? '$'+Number(a.current_price).toFixed(2) : '—'}</div>
-    </div>
-    <div class="metric-card">
-      <div class="m-label">Lowest New Price</div>
-      <div class="m-value">${a.current_new_price != null ? '$'+Number(a.current_new_price).toFixed(2) : '—'}</div>
-    </div>
-    <div class="metric-card">
-      <div class="m-label">Sales Rank</div>
-      <div class="m-value">${a.current_rank != null ? Number(a.current_rank).toLocaleString() : '—'}</div>
-    </div>
-    <div class="metric-card">
-      <div class="m-label">Sellers</div>
-      <div class="m-value">${a.current_sellers ?? '—'}</div>
-    </div>
-    <div class="metric-card">
-      <div class="m-label">Weight</div>
-      <div class="m-value">${a.weight != null ? Number(a.weight).toFixed(2)+' lb' : '—'}</div>
-    </div>
-    <div class="metric-card">
-      <div class="m-label">Category</div>
-      <div class="m-value" style="font-size:13px;">${a.category || '—'}</div>
-    </div>
-    <div class="metric-card">
-      <div class="m-label">ROI</div>
+    <div class="metric-card"><div class="m-label">Buy Box Price</div>
+      <div class="m-value">${a.current_price != null ? '$'+Number(a.current_price).toFixed(2) : '—'}</div></div>
+    <div class="metric-card"><div class="m-label">Lowest New Price</div>
+      <div class="m-value">${a.current_new_price != null ? '$'+Number(a.current_new_price).toFixed(2) : '—'}</div></div>
+    <div class="metric-card"><div class="m-label">Sales Rank</div>
+      <div class="m-value">${a.current_rank != null ? Number(a.current_rank).toLocaleString() : '—'}</div></div>
+    <div class="metric-card"><div class="m-label">Sellers</div>
+      <div class="m-value">${a.current_sellers ?? '—'}</div></div>
+    <div class="metric-card"><div class="m-label">Weight</div>
+      <div class="m-value">${a.weight != null ? Number(a.weight).toFixed(2)+' lb' : '—'}</div></div>
+    <div class="metric-card"><div class="m-label">Category</div>
+      <div class="m-value" style="font-size:13px;">${a.category || '—'}</div></div>
+    <div class="metric-card"><div class="m-label">ROI</div>
       <div class="m-value ${roiCalc ? (roiCalc.roi >= 0 ? 'roi-positive':'roi-negative') : ''}">
-        ${roiCalc ? roiCalc.roi.toFixed(1)+'%' : '—'}
-      </div>
-    </div>
-    <div class="metric-card">
-      <div class="m-label">Net Profit</div>
+        ${roiCalc ? roiCalc.roi.toFixed(1)+'%' : '—'}</div></div>
+    <div class="metric-card"><div class="m-label">Net Profit</div>
       <div class="m-value ${roiCalc ? (roiCalc.netProfit >= 0 ? 'roi-positive':'roi-negative') : ''}">
-        ${roiCalc ? '$'+roiCalc.netProfit.toFixed(2) : '—'}
-      </div>
-    </div>
-    <div class="metric-card">
-      <div class="m-label">Amazon Selling?</div>
-      <div class="m-value">${a.amazon_selling ? '<span class="badge-amz">YES</span>' : 'No'}</div>
-    </div>
+        ${roiCalc ? '$'+roiCalc.netProfit.toFixed(2) : '—'}</div></div>
+    <div class="metric-card"><div class="m-label">Amazon Selling?</div>
+      <div class="m-value">${a.amazon_selling ? '<span class="badge-amz">YES</span>' : 'No'}</div></div>
   `;
 
-  // Delta table
   document.getElementById("deltaTableBody").innerHTML = `
-    <tr>
-      <td>Buy Box Price</td>
+    <tr><td>Buy Box Price</td>
       <td class="${deltaClass(d.price_delta_30)}">${fmtDelta(d.price_delta_30,'$')}</td>
       <td class="${deltaClass(d.price_delta_90)}">${fmtDelta(d.price_delta_90,'$')}</td>
-      <td class="${deltaClass(d.price_delta_180)}">${fmtDelta(d.price_delta_180,'$')}</td>
-    </tr>
-    <tr>
-      <td>Lowest New Price</td>
+      <td class="${deltaClass(d.price_delta_180)}">${fmtDelta(d.price_delta_180,'$')}</td></tr>
+    <tr><td>Lowest New Price</td>
       <td class="${deltaClass(d.new_price_delta_30)}">${fmtDelta(d.new_price_delta_30,'$')}</td>
       <td class="${deltaClass(d.new_price_delta_90)}">${fmtDelta(d.new_price_delta_90,'$')}</td>
-      <td class="${deltaClass(d.new_price_delta_180)}">${fmtDelta(d.new_price_delta_180,'$')}</td>
-    </tr>
-    <tr>
-      <td>Sales Rank</td>
+      <td class="${deltaClass(d.new_price_delta_180)}">${fmtDelta(d.new_price_delta_180,'$')}</td></tr>
+    <tr><td>Sales Rank</td>
       <td class="${deltaClass(d.rank_delta_30, true)}">${fmtDelta(d.rank_delta_30)}</td>
       <td class="${deltaClass(d.rank_delta_90, true)}">${fmtDelta(d.rank_delta_90)}</td>
-      <td class="${deltaClass(d.rank_delta_180, true)}">${fmtDelta(d.rank_delta_180)}</td>
-    </tr>
-    <tr>
-      <td>Seller Count</td>
+      <td class="${deltaClass(d.rank_delta_180, true)}">${fmtDelta(d.rank_delta_180)}</td></tr>
+    <tr><td>Seller Count</td>
       <td class="${deltaClass(d.seller_delta_30, true)}">${fmtDelta(d.seller_delta_30)}</td>
       <td class="${deltaClass(d.seller_delta_90, true)}">${fmtDelta(d.seller_delta_90)}</td>
-      <td class="${deltaClass(d.seller_delta_180, true)}">${fmtDelta(d.seller_delta_180)}</td>
-    </tr>
+      <td class="${deltaClass(d.seller_delta_180, true)}">${fmtDelta(d.seller_delta_180)}</td></tr>
   `;
 
-  // Load charts
-  await loadDetailCharts(asin, detailPeriod);
+  await Promise.all([
+    loadSources(asin),
+    loadDetailCharts(asin, detailPeriod)
+  ]);
 
-  // Reset period buttons
   document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
   document.querySelectorAll(".period-btn")[0].classList.add("active");
-
-  // Close panels
-  document.getElementById("editPanel").classList.remove("open");
-  document.getElementById("addSourcePanel").classList.remove("open");
 }
 
 async function setDetailPeriod(days, btn) {
@@ -1435,16 +887,15 @@ async function loadDetailCharts(asin, days) {
   try {
     const res  = await fetch(`${API}/history/${asin}?days=${days}`);
     const data = await res.json();
-
-    const labels   = data.map(r => new Date(r.captured_at).toLocaleDateString());
-    const bbPrices = data.map(r => r.buybox_price);
-    const newPrices= data.map(r => r.new_price);
-    const ranks    = data.map(r => r.rank);
-    const sellers  = data.map(r => r.seller_count);
+    const labels    = data.map(r => new Date(r.captured_at).toLocaleDateString());
+    const bbPrices  = data.map(r => r.buybox_price);
+    const newPrices = data.map(r => r.new_price);
+    const ranks     = data.map(r => r.rank);
+    const sellers   = data.map(r => r.seller_count);
 
     drawChart("chartPrice", labels, [
       { label: "Buy Box Price", data: bbPrices,  borderColor: "#7c83ff", backgroundColor: "rgba(124,131,255,0.08)" },
-      { label: "Lowest New",   data: newPrices, borderColor: "#2ecc71", backgroundColor: "rgba(46,204,113,0.08)" }
+      { label: "Lowest New",   data: newPrices,  borderColor: "#2ecc71", backgroundColor: "rgba(46,204,113,0.08)" }
     ], "$", priceChart, c => priceChart = c);
 
     drawChart("chartRank", labels, [
@@ -1454,21 +905,16 @@ async function loadDetailCharts(asin, days) {
     drawChart("chartSellers", labels, [
       { label: "Seller Count", data: sellers, borderColor: "#e74c3c", backgroundColor: "rgba(231,76,60,0.08)" }
     ], "", sellersChart, c => sellersChart = c);
-
   } catch(e) { console.error("Chart error", e); }
 }
 
 function drawChart(canvasId, labels, datasets, prefix, existingChart, setChart) {
   if (existingChart) existingChart.destroy();
-  const ctx = document.getElementById(canvasId).getContext("2d");
+  const ctx   = document.getElementById(canvasId).getContext("2d");
   const chart = new Chart(ctx, {
     type: "line",
     data: { labels, datasets: datasets.map(d => ({
-      ...d,
-      tension: 0.3,
-      pointRadius: labels.length > 60 ? 0 : 3,
-      fill: true,
-      spanGaps: true
+      ...d, tension: 0.3, pointRadius: labels.length > 60 ? 0 : 3, fill: true, spanGaps: true
     }))},
     options: {
       responsive: true,
@@ -1492,25 +938,20 @@ function drawChart(canvasId, labels, datasets, prefix, existingChart, setChart) 
   setChart(chart);
 }
 
-// ============================================================
-// EDIT ASIN
-// ============================================================
 function toggleEditPanel() {
   document.getElementById("editPanel").classList.toggle("open");
 }
 
 async function saveAsinEdits() {
-  const payload = {};
+  const payload  = {};
   const cost     = document.getElementById("editCost").value;
   const fba      = document.getElementById("editFba").value;
   const referral = document.getElementById("editReferral").value;
   const notes    = document.getElementById("editNotes").value;
-
   if (cost     !== "") payload.cost = parseFloat(cost);
   if (fba      !== "") payload.fba_fee = parseFloat(fba);
   if (referral !== "") payload.referral_fee_override = parseFloat(referral);
   if (notes    !== "") payload.notes = notes;
-
   try {
     await fetch(`${API}/asins/${currentDetailAsin}`, {
       method: "PATCH",
@@ -1522,28 +963,19 @@ async function saveAsinEdits() {
     await openDetail(currentDetailAsin);
   } catch(e) { alert("Save error: " + e.message); }
 }
-// ============================================================
-// SOURCES
-// ============================================================
+
 async function loadSources(asin) {
   try {
     const res  = await fetch(`${API}/sources/${asin}`);
     const rows = await res.json();
-
     const container = document.getElementById("sourcesList");
-
     if (!rows.length) {
       container.innerHTML = `<p style="color:var(--muted);font-size:13px;">No sources added yet.</p>`;
       return;
     }
-
     container.innerHTML = `
       <div class="source-row" style="font-size:11px;color:var(--muted);font-weight:600;padding-bottom:6px;">
-        <span>SUPPLIER</span>
-        <span>URL</span>
-        <span>COST</span>
-        <span>NOTES</span>
-        <span></span>
+        <span>SUPPLIER</span><span>URL</span><span>COST</span><span>NOTES</span><span></span>
       </div>
       ${rows.map(s => `
         <div class="source-row" id="source-${s.id}">
@@ -1555,9 +987,7 @@ async function loadSources(asin) {
         </div>
       `).join("")}
     `;
-  } catch(e) {
-    console.error("Load sources error", e);
-  }
+  } catch(e) { console.error("Load sources error", e); }
 }
 
 function toggleAddSource() {
@@ -1567,7 +997,6 @@ function toggleAddSource() {
 async function addSource() {
   const url = document.getElementById("newUrl").value.trim();
   if (!url) { alert("URL is required."); return; }
-
   const payload = {
     asin:          currentDetailAsin,
     supplier_name: document.getElementById("newSupplier").value.trim(),
@@ -1575,7 +1004,6 @@ async function addSource() {
     cost:          parseFloat(document.getElementById("newSourceCost").value) || null,
     notes:         document.getElementById("newSourceNotes").value.trim()
   };
-
   try {
     const res = await fetch(`${API}/sources`, {
       method: "POST",
@@ -1583,12 +1011,10 @@ async function addSource() {
       body: JSON.stringify(payload)
     });
     if (!res.ok) { const e = await res.json(); alert(e.error); return; }
-
     document.getElementById("newSupplier").value    = "";
     document.getElementById("newUrl").value         = "";
     document.getElementById("newSourceCost").value  = "";
     document.getElementById("newSourceNotes").value = "";
-
     document.getElementById("addSourcePanel").classList.remove("open");
     await loadSources(currentDetailAsin);
   } catch(e) { alert("Error adding source: " + e.message); }
@@ -1601,9 +1027,7 @@ async function deleteSource(id) {
     await loadSources(currentDetailAsin);
   } catch(e) { alert("Error deleting source: " + e.message); }
 }
-// ============================================================
-// SETTINGS
-// ============================================================
+
 async function saveSettings() {
   const data = {
     prep_fee:      document.getElementById("sPrepFee").value,
@@ -1624,9 +1048,6 @@ async function saveSettings() {
   } catch(e) { alert("Error saving settings: " + e.message); }
 }
 
-// ============================================================
-// HELPERS
-// ============================================================
 function deltaClass(val, invert = false) {
   if (val == null) return "no-data";
   if (val === 0)   return "delta-zero";
@@ -1640,9 +1061,6 @@ function fmtDelta(val, prefix = "") {
   return `${sign}${prefix}${Number(val).toFixed(2)}`;
 }
 
-// ============================================================
-// INIT
-// ============================================================
 loadAll();
 </script>
 </body>
