@@ -330,6 +330,14 @@ def sync_keepa():
                 # --- TITLE ---
                 title = product.get("title", "")
 
+                # --- IMAGE ---
+                image_url = None
+                images = product.get("imagesCSV", "")
+                if images:
+                    first_image = images.split(",")[0].strip()
+                    if first_image:
+                        image_url = f"https://images-na.ssl-images-amazon.com/images/I/{first_image}"
+
                 # --- UPDATE ASINS TABLE ---
                 update_fields = []
                 update_vals = []
@@ -343,6 +351,9 @@ def sync_keepa():
                 if category:
                     update_fields.append("category = %s")
                     update_vals.append(category)
+                if image_url:
+                    update_fields.append("image_url = %s")
+                    update_vals.append(image_url)
 
                 if update_fields:
                     update_vals.append(asin)
@@ -350,7 +361,7 @@ def sync_keepa():
                         f"UPDATE asins SET {', '.join(update_fields)} WHERE asin = %s",
                         update_vals
                     )
-
+                    
                 # --- INSERT HISTORY ---
                 cur.execute("""
                     INSERT INTO history 
@@ -450,7 +461,103 @@ def get_deltas(asin):
 
     conn.close()
     return jsonify(result)
+# -------------------------------
+# ROUTES - SOURCES
+# -------------------------------
 
+@app.route("/sources/<asin>", methods=["GET"])
+def get_sources(asin):
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("""
+            SELECT * FROM sources 
+            WHERE asin = %s 
+            ORDER BY created_at ASC
+        """, (asin.upper(),))
+        rows = cur.fetchall()
+        conn.close()
+        return jsonify(rows)
+    except Exception as e:
+        logging.error(f"Get sources error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/sources", methods=["POST"])
+def add_source():
+    try:
+        data = request.json
+        asin = data.get("asin", "").strip().upper()
+        url  = data.get("url", "").strip()
+
+        if not asin or not url:
+            return jsonify({"error": "ASIN and URL are required"}), 400
+
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("""
+            INSERT INTO sources (asin, supplier_name, url, cost, notes)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING *
+        """, (
+            asin,
+            data.get("supplier_name", ""),
+            url,
+            data.get("cost"),
+            data.get("notes", "")
+        ))
+        conn.commit()
+        row = cur.fetchone()
+        conn.close()
+        return jsonify(dict(row)), 201
+    except Exception as e:
+        logging.error(f"Add source error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/sources/<source_id>", methods=["DELETE"])
+def delete_source(source_id):
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM sources WHERE id = %s", (source_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        logging.error(f"Delete source error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/sources/<source_id>", methods=["PATCH"])
+def update_source(source_id):
+    try:
+        data = request.json
+        conn = get_db()
+        cur = conn.cursor()
+
+        fields = []
+        values = []
+
+        for field in ["supplier_name", "url", "cost", "notes"]:
+            if field in data:
+                fields.append(f"{field} = %s")
+                values.append(data[field])
+
+        if not fields:
+            return jsonify({"error": "No fields to update"}), 400
+
+        values.append(source_id)
+        cur.execute(
+            f"UPDATE sources SET {', '.join(fields)} WHERE id = %s",
+            values
+        )
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True})
+    except Exception as e:
+        logging.error(f"Update source error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 # -------------------------------
 # SERVE FRONTEND
