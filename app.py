@@ -279,7 +279,7 @@ def sync_keepa():
                 # --- BUY BOX PRICE (csv index 18) ---
                 buybox_price = None
                 if len(csv) > 18 and csv[18]:
-                    vals = [v for v in csv[18] if v != -1]
+                    vals = [v for v in csv[18] if v not in (-1, 0)]
                     if vals:
                         buybox_price = vals[-1] / 100
 
