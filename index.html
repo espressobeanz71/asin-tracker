@@ -803,6 +803,38 @@
       <tbody id="deltaTableBody"></tbody>
     </table>
   </div>
+  </table>
+    </div>
+  </div>
+
+  <!-- SOURCES -->
+  <div class="panel">
+    <h3>Purchase Sources</h3>
+    <div id="sourcesList"></div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary btn-sm" onclick="toggleAddSource()">+ Add Source</button>
+    </div>
+    <div class="collapsible" id="addSourcePanel" style="margin-top:16px;">
+      <div class="source-row" style="font-size:11px;color:var(--muted);font-weight:600;">
+        <span>SUPPLIER NAME</span>
+        <span>URL</span>
+        <span>COST ($)</span>
+        <span>NOTES</span>
+        <span></span>
+      </div>
+      <div class="source-row">
+        <input type="text" id="newSupplier" placeholder="e.g. Walmart"/>
+        <input type="text" id="newUrl" placeholder="https://..."/>
+        <input type="number" id="newSourceCost" step="0.01" placeholder="0.00"/>
+        <input type="text" id="newSourceNotes" placeholder="Optional"/>
+        <button class="btn btn-success btn-sm" onclick="addSource()">Add</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== SETTINGS ==================== -->
 
 </div>
 <!-- SOURCES -->
