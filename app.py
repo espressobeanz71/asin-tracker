@@ -276,17 +276,17 @@ def sync_keepa():
 
                 csv = product.get("csv") or []
 
-                # --- BUY BOX PRICE (csv index 18) ---
+               # --- BUY BOX PRICE (csv index 18) ---
                 buybox_price = None
                 if len(csv) > 18 and csv[18]:
-                    vals = [v for v in csv[18] if v not in (-1, 0)]
+                    vals = [v for v in csv[18] if v not in (-1, 0) and v < 1000000]
                     if vals:
                         buybox_price = vals[-1] / 100
 
-                # --- NEW PRICE / LOWEST NEW (csv index 1) ---
+               # --- NEW PRICE / LOWEST NEW (csv index 1) ---
                 new_price = None
                 if len(csv) > 1 and csv[1]:
-                    vals = [v for v in csv[1] if v != -1]
+                    vals = [v for v in csv[1] if v not in (-1, 0) and v < 1000000]
                     if vals:
                         new_price = vals[-1] / 100
 
