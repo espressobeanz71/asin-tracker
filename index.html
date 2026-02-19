@@ -193,8 +193,7 @@
         <tr>
           <th onclick="dashSort('asin')">ASIN</th>
           <th onclick="dashSort('title')">Title</th>
-          <th onclick="dashSort('current_price')">Buy Box</th>
-          <th onclick="dashSort('current_new_price')">Lowest New</th>
+          <th onclick="dashSort('current_price')">Price</th>
           <th onclick="dashSort('current_rank')">Rank</th>
           <th onclick="dashSort('current_sellers')">Sellers</th>
           <th>Amazon?</th>
@@ -633,8 +632,7 @@ function renderDashboard() {
     return `<tr>
       <td><span class="asin-link" onclick="openDetail('${r.asin}')">${r.asin}</span></td>
       <td class="title-cell" title="${r.title||''}">${r.title||'<span class="no-data">—</span>'}</td>
-      <td>${r.current_price != null ? '$'+Number(r.current_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
-      <td>${r.current_new_price != null ? '$'+Number(r.current_new_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
+      <td>${r.current_price != null ? '$'+Number(r.current_price).toFixed(2) : (r.current_new_price != null ? '$'+Number(r.current_new_price).toFixed(2) : '<span class="no-data">—</span>')}</td>
       <td>${r.current_rank != null ? Number(r.current_rank).toLocaleString() : '<span class="no-data">—</span>'}</td>
       <td>${r.current_sellers ?? '<span class="no-data">—</span>'}</td>
       <td>${r.amazon_selling ? '<span class="badge-amz">AMZ</span>' : '<span class="no-data">—</span>'}</td>
