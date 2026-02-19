@@ -1,41 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ASIN Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d2e;
+      --border: #2e3150;
+      --accent: #7c83ff;
+      --green: #2ecc71;
+      --red: #e74c3c;
+      --orange: #f39c12;
+      --text: #e0e0e0;
+      --muted: #888;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #0f1117;
-      color: #e0e0e0;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
     }
 
-    header {
-      background: #1a1d2e;
-      padding: 16px 32px;
+    /* ---- NAV ---- */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #2e3150;
+      padding: 0 32px;
+      height: 56px;
+      gap: 8px;
     }
 
-    header h1 {
-      font-size: 20px;
+    .nav-brand {
+      font-size: 18px;
       font-weight: 700;
-      color: #7c83ff;
+      color: var(--accent);
+      margin-right: 24px;
       letter-spacing: 1px;
     }
 
-    .header-actions {
+    .nav-btn {
+      padding: 7px 16px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover { color: var(--text); background: var(--border); }
+    .nav-btn.active { color: var(--accent); background: rgba(124,131,255,0.12); }
+
+    .nav-right {
+      margin-left: auto;
       display: flex;
+      align-items: center;
       gap: 10px;
     }
 
-    button {
+    #syncStatus {
+      font-size: 12px;
+      color: var(--muted);
+      background: #12152a;
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+
+    /* ---- BUTTONS ---- */
+    .btn {
       padding: 8px 16px;
       border: none;
       border-radius: 6px;
@@ -44,66 +86,64 @@
       font-weight: 600;
       transition: opacity 0.2s;
     }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-danger  { background: var(--red); color: #fff; }
+    .btn-muted   { background: var(--border); color: var(--muted); }
+    .btn-sm      { padding: 4px 10px; font-size: 11px; }
+    .btn-orange  { background: var(--orange); color: #000; }
 
-    button:hover { opacity: 0.85; }
+    /* ---- PAGES ---- */
+    .page { display: none; padding: 28px 32px; max-width: 1500px; margin: 0 auto; }
+    .page.active { display: block; }
 
-    .btn-primary { background: #7c83ff; color: #fff; }
-    .btn-success { background: #2ecc71; color: #fff; }
-    .btn-danger  { background: #e74c3c; color: #fff; font-size: 11px; padding: 4px 10px; }
-    .btn-sm      { font-size: 11px; padding: 4px 10px; background: #2e3150; color: #aaa; }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 24px 32px;
-    }
-
-    /* STATS BAR */
+    /* ---- STAT CARDS ---- */
     .stats-bar {
-      display: flex;
-      gap: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
       margin-bottom: 24px;
     }
 
     .stat-card {
-      background: #1a1d2e;
-      border: 1px solid #2e3150;
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 16px 24px;
-      flex: 1;
+      padding: 16px;
       text-align: center;
     }
 
-    .stat-card .number {
-      font-size: 28px;
+    .stat-card .num {
+      font-size: 26px;
       font-weight: 700;
-      color: #7c83ff;
+      color: var(--accent);
     }
 
-    .stat-card .label {
-      font-size: 12px;
-      color: #888;
+    .stat-card .lbl {
+      font-size: 11px;
+      color: var(--muted);
       margin-top: 4px;
     }
 
-    /* ADD ASIN PANEL */
-    .add-panel {
-      background: #1a1d2e;
-      border: 1px solid #2e3150;
+    /* ---- PANELS ---- */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 10px;
       padding: 20px 24px;
-      margin-bottom: 24px;
-      display: none;
+      margin-bottom: 20px;
     }
 
-    .add-panel.open { display: block; }
-
-    .add-panel h3 {
+    .panel h3 {
+      font-size: 14px;
+      color: var(--muted);
       margin-bottom: 16px;
-      font-size: 15px;
-      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
+    /* ---- FORMS ---- */
     .form-row {
       display: flex;
       gap: 12px;
@@ -115,28 +155,28 @@
       flex-direction: column;
       gap: 6px;
       flex: 1;
-      min-width: 140px;
+      min-width: 130px;
     }
 
     .form-group label {
       font-size: 11px;
-      color: #888;
+      color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .form-group input {
-      background: #0f1117;
-      border: 1px solid #2e3150;
+    .form-group input, .form-group select {
+      background: var(--bg);
+      border: 1px solid var(--border);
       border-radius: 6px;
       padding: 8px 12px;
-      color: #e0e0e0;
+      color: var(--text);
       font-size: 13px;
     }
 
-    .form-group input:focus {
+    .form-group input:focus, .form-group select:focus {
       outline: none;
-      border-color: #7c83ff;
+      border-color: var(--accent);
     }
 
     .form-actions {
@@ -145,43 +185,10 @@
       margin-top: 16px;
     }
 
-    /* FILTERS */
-    .filters {
-      background: #1a1d2e;
-      border: 1px solid #2e3150;
-      border-radius: 10px;
-      padding: 16px 24px;
-      margin-bottom: 24px;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .filters input {
-      background: #0f1117;
-      border: 1px solid #2e3150;
-      border-radius: 6px;
-      padding: 8px 12px;
-      color: #e0e0e0;
-      font-size: 13px;
-      width: 220px;
-    }
-
-    .filters input:focus {
-      outline: none;
-      border-color: #7c83ff;
-    }
-
-    .filter-label {
-      font-size: 12px;
-      color: #888;
-    }
-
-    /* TABLE */
+    /* ---- TABLE ---- */
     .table-wrap {
-      background: #1a1d2e;
-      border: 1px solid #2e3150;
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 10px;
       overflow: auto;
     }
@@ -194,14 +201,14 @@
 
     thead th {
       background: #12152a;
-      padding: 12px 16px;
+      padding: 11px 14px;
       text-align: left;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #7c83ff;
+      color: var(--accent);
       white-space: nowrap;
-      border-bottom: 1px solid #2e3150;
+      border-bottom: 1px solid var(--border);
       cursor: pointer;
       user-select: none;
     }
@@ -216,29 +223,32 @@
     tbody tr:hover { background: #1e2240; }
 
     tbody td {
-      padding: 11px 16px;
+      padding: 10px 14px;
       white-space: nowrap;
     }
 
-    .asin-code {
+    .asin-link {
       font-family: monospace;
-      color: #7c83ff;
+      color: var(--accent);
       font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
     }
 
     .title-cell {
-      max-width: 220px;
+      max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
       color: #ccc;
     }
 
-    .delta-up   { color: #2ecc71; font-weight: 600; }
-    .delta-down { color: #e74c3c; font-weight: 600; }
-    .delta-zero { color: #888; }
+    .delta-up   { color: var(--green); font-weight: 600; }
+    .delta-down { color: var(--red); font-weight: 600; }
+    .delta-zero { color: var(--muted); }
+    .no-data    { color: #444; }
 
-    .amazon-badge {
-      background: #f39c12;
+    .badge-amz {
+      background: var(--orange);
       color: #000;
       font-size: 10px;
       font-weight: 700;
@@ -246,370 +256,1177 @@
       border-radius: 4px;
     }
 
-    .no-data { color: #555; }
+    .roi-positive { color: var(--green); font-weight: 700; }
+    .roi-negative { color: var(--red); font-weight: 700; }
 
-    /* LOADING & EMPTY */
     .status-msg {
       text-align: center;
-      padding: 60px;
-      color: #555;
-      font-size: 15px;
+      padding: 50px;
+      color: #444;
+      font-size: 14px;
     }
 
-    /* SYNC STATUS */
-    #syncStatus {
+    /* ---- ADD PANEL TOGGLE ---- */
+    .collapsible { display: none; }
+    .collapsible.open { display: block; }
+
+    /* ---- FILTER BUILDER ---- */
+    .filter-builder {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .filter-row {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filter-row label {
       font-size: 12px;
-      color: #888;
-      padding: 4px 10px;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .filter-row select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+
+    /* ---- DETAIL PAGE ---- */
+    .detail-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .detail-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .detail-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .metric-card .m-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .metric-card .m-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .metric-card .m-delta {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .delta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .delta-table th {
       background: #12152a;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .delta-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #1e2138;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 280px;
+      margin-bottom: 8px;
+    }
+
+    .period-btns {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .period-btn {
+      padding: 5px 14px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .period-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ---- SETTINGS ---- */
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .setting-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .setting-item label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .setting-item input {
+      background: var(--bg);
+      border: 1px solid var(--border);
       border-radius: 6px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .setting-item input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .setting-item .hint {
+      font-size: 11px;
+      color: #555;
     }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>⚡ ASIN TRACKER</h1>
-  <div class="header-actions">
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">⚡ ASIN TRACKER</div>
+  <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
+  <button class="nav-btn" onclick="showPage('velocity')">Velocity Filter</button>
+  <button class="nav-btn" onclick="showPage('settings')">Settings</button>
+  <div class="nav-right">
     <span id="syncStatus">Not synced yet</span>
-    <button class="btn-success" onclick="syncKeepa()">🔄 Sync Keepa</button>
-    <button class="btn-primary" onclick="toggleAddPanel()">+ Add ASIN</button>
+    <button class="btn btn-success" onclick="syncKeepa()">🔄 Sync Keepa</button>
   </div>
-</header>
+</nav>
 
-<div class="container">
+<!-- ==================== DASHBOARD ==================== -->
+<div class="page active" id="page-dashboard">
 
-  <!-- STATS -->
   <div class="stats-bar">
-    <div class="stat-card">
-      <div class="number" id="statTotal">—</div>
-      <div class="label">Total ASINs</div>
+    <div class="stat-card"><div class="num" id="statTotal">—</div><div class="lbl">Total ASINs</div></div>
+    <div class="stat-card"><div class="num" id="statAmazon">—</div><div class="lbl">Amazon Selling</div></div>
+    <div class="stat-card"><div class="num" id="statPriceUp">—</div><div class="lbl">Price ↑ 30d</div></div>
+    <div class="stat-card"><div class="num" id="statSellersDown">—</div><div class="lbl">Sellers ↓ 30d</div></div>
+    <div class="stat-card"><div class="num" id="statRoiPos">—</div><div class="lbl">Positive ROI</div></div>
+  </div>
+
+  <!-- ADD ASIN -->
+  <div class="panel" style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:600;font-size:14px;">Manage ASINs</span>
+      <button class="btn btn-primary" onclick="toggleAdd()">+ Add ASIN</button>
     </div>
-    <div class="stat-card">
-      <div class="number" id="statAmazon">—</div>
-      <div class="label">Amazon Selling</div>
-    </div>
-    <div class="stat-card">
-      <div class="number" id="statPriceUp">—</div>
-      <div class="label">Price ↑ 30d</div>
-    </div>
-    <div class="stat-card">
-      <div class="number" id="statSellersDown">—</div>
-      <div class="label">Sellers ↓ 30d</div>
+    <div class="collapsible" id="addPanel" style="margin-top:16px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label>ASIN *</label>
+          <input type="text" id="iAsin" placeholder="B08N5WRWNW" maxlength="10"/>
+        </div>
+        <div class="form-group">
+          <label>Cost Price ($)</label>
+          <input type="number" id="iCost" placeholder="0.00" step="0.01"/>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input type="text" id="iNotes" placeholder="Optional"/>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="addAsin()">Add ASIN</button>
+        <button class="btn btn-muted" onclick="toggleAdd()">Cancel</button>
+      </div>
     </div>
   </div>
 
-  <!-- ADD PANEL -->
-  <div class="add-panel" id="addPanel">
-    <h3>Add New ASIN</h3>
-    <div class="form-row">
-      <div class="form-group">
-        <label>ASIN *</label>
-        <input type="text" id="inputAsin" placeholder="B08N5WRWNW" maxlength="10"/>
-      </div>
-      <div class="form-group">
-        <label>Title (optional)</label>
-        <input type="text" id="inputTitle" placeholder="Will auto-fill on sync"/>
-      </div>
-      <div class="form-group">
-        <label>Cost Price ($)</label>
-        <input type="number" id="inputCost" placeholder="0.00" step="0.01"/>
-      </div>
-      <div class="form-group">
-        <label>Weight (lbs)</label>
-        <input type="number" id="inputWeight" placeholder="0.00" step="0.01"/>
-      </div>
-      <div class="form-group">
-        <label>Notes</label>
-        <input type="text" id="inputNotes" placeholder="Optional notes"/>
-      </div>
-    </div>
-    <div class="form-actions">
-      <button class="btn-primary" onclick="addAsin()">Add ASIN</button>
-      <button class="btn-sm" onclick="toggleAddPanel()">Cancel</button>
-    </div>
+  <!-- SEARCH -->
+  <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center;">
+    <input type="text" id="dashSearch" placeholder="Search ASIN or title..."
+      style="background:var(--surface);border:1px solid var(--border);border-radius:6px;
+             padding:8px 14px;color:var(--text);font-size:13px;width:260px;"
+      oninput="renderDashboard()"/>
+    <button class="btn btn-muted btn-sm" onclick="document.getElementById('dashSearch').value='';renderDashboard()">Clear</button>
   </div>
 
-  <!-- FILTERS -->
-  <div class="filters">
-    <span class="filter-label">Filter:</span>
-    <input type="text" id="searchInput" placeholder="Search ASIN or title..." oninput="renderTable()"/>
-    <button class="btn-sm" onclick="filterPriceUp()">Price ↑ 30d</button>
-    <button class="btn-sm" onclick="filterSellersDown()">Sellers ↓ 30d</button>
-    <button class="btn-sm" onclick="clearFilters()">Clear</button>
-  </div>
-
-  <!-- TABLE -->
+  <!-- DASHBOARD TABLE -->
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th onclick="sortBy('asin')">ASIN</th>
-          <th onclick="sortBy('title')">Title</th>
-          <th onclick="sortBy('current_price')">Price</th>
-          <th onclick="sortBy('price_delta_30')">Δ Price 30d</th>
-          <th onclick="sortBy('price_delta_90')">Δ Price 90d</th>
-          <th onclick="sortBy('current_rank')">Rank</th>
-          <th onclick="sortBy('rank_delta_30')">Δ Rank 30d</th>
-          <th onclick="sortBy('current_sellers')">Sellers</th>
-          <th onclick="sortBy('seller_delta_30')">Δ Sellers 30d</th>
-          <th onclick="sortBy('current_stock')">Stock</th>
+          <th onclick="dashSort('asin')">ASIN</th>
+          <th onclick="dashSort('title')">Title</th>
+          <th onclick="dashSort('current_price')">Buy Box</th>
+          <th onclick="dashSort('current_new_price')">Lowest New</th>
+          <th onclick="dashSort('current_rank')">Rank</th>
+          <th onclick="dashSort('current_sellers')">Sellers</th>
           <th>Amazon?</th>
-          <th>Cost</th>
+          <th onclick="dashSort('weight')">Weight</th>
+          <th onclick="dashSort('cost')">Cost</th>
+          <th onclick="dashSort('roi')">ROI</th>
           <th>Actions</th>
         </tr>
       </thead>
-      <tbody id="tableBody">
-        <tr><td colspan="13" class="status-msg">Loading...</td></tr>
+      <tbody id="dashBody">
+        <tr><td colspan="11" class="status-msg">Loading...</td></tr>
       </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== VELOCITY FILTER ==================== -->
+<div class="page" id="page-velocity">
+
+  <div class="panel">
+    <h3>Filter Builder — combine any rules</h3>
+    <div class="filter-builder" id="filterBuilder">
+
+      <div class="filter-row">
+        <label>Buy Box Price</label>
+        <select id="f_price_bb_dir">
+          <option value="">Any</option>
+          <option value="up">Trending ↑</option>
+          <option value="down">Trending ↓</option>
+        </select>
+        <select id="f_price_bb_period">
+          <option value="30">30d</option>
+          <option value="90">90d</option>
+          <option value="180">180d</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <label>Lowest New Price</label>
+        <select id="f_price_new_dir">
+          <option value="">Any</option>
+          <option value="up">Trending ↑</option>
+          <option value="down">Trending ↓</option>
+        </select>
+        <select id="f_price_new_period">
+          <option value="30">30d</option>
+          <option value="90">90d</option>
+          <option value="180">180d</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <label>Seller Count</label>
+        <select id="f_sellers_dir">
+          <option value="">Any</option>
+          <option value="down">Decreasing ↓</option>
+          <option value="up">Increasing ↑</option>
+        </select>
+        <select id="f_sellers_period">
+          <option value="30">30d</option>
+          <option value="90">90d</option>
+          <option value="180">180d</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <label>Sales Rank</label>
+        <select id="f_rank_dir">
+          <option value="">Any</option>
+          <option value="down">Improving ↓</option>
+          <option value="up">Worsening ↑</option>
+        </select>
+        <select id="f_rank_period">
+          <option value="30">30d</option>
+          <option value="90">90d</option>
+          <option value="180">180d</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <label>Amazon Selling</label>
+        <select id="f_amazon">
+          <option value="">Any</option>
+          <option value="yes">Yes — Amazon in</option>
+          <option value="no">No — Amazon out</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <label>ROI</label>
+        <select id="f_roi">
+          <option value="">Any</option>
+          <option value="pos">Positive</option>
+          <option value="neg">Negative</option>
+          <option value="20">≥ 20%</option>
+          <option value="30">≥ 30%</option>
+          <option value="50">≥ 50%</option>
+        </select>
+      </div>
+
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" onclick="runVelocityFilter()">Run Filter</button>
+      <button class="btn btn-muted" onclick="clearVelocityFilter()">Clear All</button>
+    </div>
+  </div>
+
+  <div style="margin-bottom:10px;font-size:13px;color:var(--muted);" id="velocityCount"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ASIN</th>
+          <th>Title</th>
+          <th>Buy Box</th>
+          <th>Lowest New</th>
+          <th>Rank</th>
+          <th>Sellers</th>
+          <th>Amazon?</th>
+          <th>ROI</th>
+          <th>BB Δ Price</th>
+          <th>Seller Δ</th>
+          <th>Rank Δ</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="velocityBody">
+        <tr><td colspan="12" class="status-msg">Set filters above and click Run Filter</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== ASIN DETAIL ==================== -->
+<div class="page" id="page-detail">
+  <div style="margin-bottom:16px;">
+    <button class="btn btn-muted btn-sm" onclick="goBack()">← Back</button>
+  </div>
+  <div class="detail-header">
+    <div>
+      <div class="detail-title" id="detailAsin">—</div>
+      <div class="detail-subtitle" id="detailTitle">—</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-orange btn-sm" onclick="toggleEditPanel()">✏️ Edit ASIN</button>
+    </div>
+  </div>
+
+  <!-- EDIT PANEL -->
+  <div class="panel collapsible" id="editPanel" style="margin-bottom:20px;">
+    <h3>Override Per-ASIN Values</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Cost Price ($)</label>
+        <input type="number" id="editCost" step="0.01"/>
+      </div>
+      <div class="form-group">
+        <label>FBA Fee Override ($)</label>
+        <input type="number" id="editFba" step="0.01" placeholder="Leave blank for default"/>
+      </div>
+      <div class="form-group">
+        <label>Referral % Override</label>
+        <input type="number" id="editReferral" step="0.01" placeholder="e.g. 15 for 15%"/>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <input type="text" id="editNotes"/>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="saveAsinEdits()">Save</button>
+      <button class="btn btn-muted" onclick="toggleEditPanel()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics-grid" id="detailMetrics"></div>
+
+  <!-- PERIOD SELECTOR -->
+  <div class="period-btns">
+    <button class="period-btn active" onclick="setDetailPeriod(30, this)">30d</button>
+    <button class="period-btn" onclick="setDetailPeriod(90, this)">90d</button>
+    <button class="period-btn" onclick="setDetailPeriod(180, this)">180d</button>
+    <button class="period-btn" onclick="setDetailPeriod(365, this)">1yr</button>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="panel">
+    <h3>Buy Box Price & Lowest New Price</h3>
+    <div class="chart-container"><canvas id="chartPrice"></canvas></div>
+  </div>
+
+  <div class="panel">
+    <h3>Sales Rank</h3>
+    <div class="chart-container"><canvas id="chartRank"></canvas></div>
+  </div>
+
+  <div class="panel">
+    <h3>Seller Count</h3>
+    <div class="chart-container"><canvas id="chartSellers"></canvas></div>
+  </div>
+
+  <!-- DELTA TABLE -->
+  <div class="panel">
+    <h3>Delta Summary</h3>
+    <table class="delta-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Δ 30 Days</th>
+          <th>Δ 90 Days</th>
+          <th>Δ 180 Days</th>
+        </tr>
+      </thead>
+      <tbody id="deltaTableBody"></tbody>
     </table>
   </div>
 
 </div>
 
+<!-- ==================== SETTINGS ==================== -->
+<div class="page" id="page-settings">
+  <div class="panel">
+    <h3>Global Cost Defaults</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+      These apply to all ASINs unless overridden per ASIN on the detail page.
+    </p>
+    <div class="settings-grid">
+      <div class="setting-item">
+        <label>Prep Fee ($ per unit)</label>
+        <input type="number" id="sPrepFee" step="0.01" placeholder="e.g. 1.25"/>
+        <span class="hint">Your 3PL or prep centre fee per item</span>
+      </div>
+      <div class="setting-item">
+        <label>Shipping Rate ($ per lb)</label>
+        <input type="number" id="sShippingRate" step="0.01" placeholder="e.g. 0.50"/>
+        <span class="hint">Your cost to ship product to Amazon FBA</span>
+      </div>
+      <div class="setting-item">
+        <label>Default FBA Fee ($)</label>
+        <input type="number" id="sFbaFee" step="0.01" placeholder="e.g. 3.22"/>
+        <span class="hint">Amazon FBA fulfilment fee — override per ASIN if varies</span>
+      </div>
+    </div>
+    <div class="form-actions" style="margin-top:24px;">
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+    <div id="settingsSaved" style="display:none;color:var(--green);font-size:13px;margin-top:12px;">
+      ✅ Settings saved
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>About ROI Calculation</h3>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;">
+      <strong style="color:var(--text);">True Cost</strong> = Product Cost + Prep Fee + (Weight × Shipping Rate)<br>
+      <strong style="color:var(--text);">Amazon Fees</strong> = (Sale Price × Referral %) + FBA Fee<br>
+      <strong style="color:var(--text);">Net Profit</strong> = Sale Price − Amazon Fees − True Cost<br>
+      <strong style="color:var(--text);">ROI</strong> = Net Profit ÷ True Cost × 100<br><br>
+      Referral % is automatically mapped from the product category pulled from Keepa.
+      You can override FBA fee and referral % per ASIN on the detail page.
+    </p>
+  </div>
+</div>
+
 <script>
-  const API = "https://asin-tracker.onrender.com";
+const API = "https://asin-tracker.onrender.com";
 
-  let allAsins = [];
-  let deltas = {};
-  let sortKey = null;
-  let sortDir = 1;
-  let activeFilter = null;
+// ============================================================
+// STATE
+// ============================================================
+let allAsins   = [];
+let allDeltas  = {};
+let settings   = { prep_fee: 0, shipping_rate: 0, fba_fee: 3.22 };
+let dashSortKey = null;
+let dashSortDir = 1;
+let currentDetailAsin = null;
+let detailPeriod = 30;
+let previousPage = "dashboard";
+let priceChart = null, rankChart = null, sellersChart = null;
 
-  // -------------------------------
-  // LOAD DATA
-  // -------------------------------
-  async function loadAsins() {
-    try {
-      const res = await fetch(`${API}/asins`);
-      allAsins = await res.json();
-      await loadAllDeltas();
-      updateStats();
-      renderTable();
-    } catch (e) {
-      document.getElementById("tableBody").innerHTML =
-        `<tr><td colspan="13" class="status-msg">Error loading data. Is the API running?</td></tr>`;
-    }
+// ============================================================
+// REFERRAL FEE MAP
+// ============================================================
+const REFERRAL_FEES = {
+  "baby": 0.08,
+  "beauty": 0.08,
+  "clothing": 0.17,
+  "apparel": 0.17,
+  "grocery": 0.08,
+  "food": 0.08,
+  "health": 0.08,
+  "home": 0.15,
+  "kitchen": 0.15,
+  "office": 0.15,
+  "pet": 0.15,
+  "sports": 0.15,
+  "outdoors": 0.15,
+  "tools": 0.15,
+  "improvement": 0.15,
+  "toys": 0.15,
+  "games": 0.15,
+  "arts": 0.15,
+  "crafts": 0.15,
+  "automotive": 0.12,
+  "industrial": 0.12,
+  "musical": 0.15,
+  "patio": 0.15,
+  "lawn": 0.15,
+  "garden": 0.15,
+};
+
+function getReferralFee(category) {
+  if (!category) return 0.15;
+  const lower = category.toLowerCase();
+  for (const [key, val] of Object.entries(REFERRAL_FEES)) {
+    if (lower.includes(key)) return val;
   }
+  return 0.15;
+}
 
-  async function loadAllDeltas() {
-    const promises = allAsins.map(a =>
-      fetch(`${API}/deltas/${a.asin}`)
-        .then(r => r.json())
-        .then(d => { deltas[a.asin] = d; })
-        .catch(() => {})
+// ============================================================
+// ROI CALCULATION
+// ============================================================
+function calcROI(asin) {
+  const price = parseFloat(asin.current_price || asin.current_new_price || 0);
+  const cost  = parseFloat(asin.cost || 0);
+  if (!price || !cost) return null;
+
+  const prepFee      = parseFloat(settings.prep_fee || 0);
+  const shippingRate = parseFloat(settings.shipping_rate || 0);
+  const weight       = parseFloat(asin.weight || 0);
+  const fbaFee       = parseFloat(asin.fba_fee || settings.fba_fee || 3.22);
+  const referralPct  = asin.referral_fee_override
+    ? parseFloat(asin.referral_fee_override) / 100
+    : getReferralFee(asin.category);
+
+  const trueCost    = cost + prepFee + (weight * shippingRate);
+  const amazonFees  = (price * referralPct) + fbaFee;
+  const netProfit   = price - amazonFees - trueCost;
+  const roi         = (netProfit / trueCost) * 100;
+
+  return { roi, netProfit, trueCost, amazonFees };
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function showPage(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-" + name).classList.add("active");
+  document.querySelectorAll(".nav-btn").forEach(b => {
+    if (b.textContent.toLowerCase().includes(name.replace("-","").substring(0,4)))
+      b.classList.add("active");
+  });
+  previousPage = name;
+}
+
+function goBack() {
+  showPage(previousPage === "detail" ? "dashboard" : previousPage);
+}
+
+// ============================================================
+// LOAD DATA
+// ============================================================
+async function loadAll() {
+  await Promise.all([loadSettings(), loadAsins()]);
+}
+
+async function loadSettings() {
+  try {
+    const res = await fetch(`${API}/settings`);
+    const data = await res.json();
+    settings = { ...settings, ...data };
+    document.getElementById("sPrepFee").value      = settings.prep_fee || "";
+    document.getElementById("sShippingRate").value = settings.shipping_rate || "";
+    document.getElementById("sFbaFee").value       = settings.fba_fee || "";
+  } catch(e) { console.error("Settings load error", e); }
+}
+
+async function loadAsins() {
+  try {
+    const res = await fetch(`${API}/asins`);
+    allAsins = await res.json();
+    await loadAllDeltas();
+    updateStats();
+    renderDashboard();
+  } catch(e) {
+    document.getElementById("dashBody").innerHTML =
+      `<tr><td colspan="11" class="status-msg">Error loading data.</td></tr>`;
+  }
+}
+
+async function loadAllDeltas() {
+  const promises = allAsins.map(a =>
+    fetch(`${API}/deltas/${a.asin}`)
+      .then(r => r.json())
+      .then(d => { allDeltas[a.asin] = d; })
+      .catch(() => {})
+  );
+  await Promise.all(promises);
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+  document.getElementById("statTotal").textContent = allAsins.length;
+  document.getElementById("statAmazon").textContent =
+    allAsins.filter(a => a.amazon_selling).length;
+  document.getElementById("statPriceUp").textContent =
+    allAsins.filter(a => allDeltas[a.asin]?.price_delta_30 > 0).length;
+  document.getElementById("statSellersDown").textContent =
+    allAsins.filter(a => allDeltas[a.asin]?.seller_delta_30 < 0).length;
+  document.getElementById("statRoiPos").textContent =
+    allAsins.filter(a => { const r = calcROI(a); return r && r.roi > 0; }).length;
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function dashSort(key) {
+  if (dashSortKey === key) dashSortDir *= -1;
+  else { dashSortKey = key; dashSortDir = 1; }
+  renderDashboard();
+}
+
+function renderDashboard() {
+  const search = (document.getElementById("dashSearch").value || "").toLowerCase();
+
+  let rows = allAsins.map(a => ({
+    ...a,
+    roi: calcROI(a)?.roi ?? null
+  }));
+
+  if (search) {
+    rows = rows.filter(r =>
+      r.asin.toLowerCase().includes(search) ||
+      (r.title || "").toLowerCase().includes(search)
     );
-    await Promise.all(promises);
   }
 
-  // -------------------------------
-  // STATS
-  // -------------------------------
-  function updateStats() {
-    document.getElementById("statTotal").textContent = allAsins.length;
-
-    const amazonCount = allAsins.filter(a => a.amazon_selling).length;
-    document.getElementById("statAmazon").textContent = amazonCount;
-
-    const priceUp = allAsins.filter(a => {
-      const d = deltas[a.asin];
-      return d && d.price_delta_30 > 0;
-    }).length;
-    document.getElementById("statPriceUp").textContent = priceUp;
-
-    const sellersDown = allAsins.filter(a => {
-      const d = deltas[a.asin];
-      return d && d.seller_delta_30 < 0;
-    }).length;
-    document.getElementById("statSellersDown").textContent = sellersDown;
+  if (dashSortKey) {
+    rows.sort((a, b) => {
+      const av = a[dashSortKey] ?? -Infinity;
+      const bv = b[dashSortKey] ?? -Infinity;
+      return typeof av === "string"
+        ? av.localeCompare(bv) * dashSortDir
+        : (av - bv) * dashSortDir;
+    });
   }
 
-  // -------------------------------
-  // RENDER TABLE
-  // -------------------------------
-  function renderTable() {
-    const search = document.getElementById("searchInput").value.toLowerCase();
+  if (!rows.length) {
+    document.getElementById("dashBody").innerHTML =
+      `<tr><td colspan="11" class="status-msg">No ASINs found.</td></tr>`;
+    return;
+  }
 
-    let rows = allAsins.map(a => ({
-      ...a,
-      price_delta_30:  deltas[a.asin]?.price_delta_30  ?? null,
-      price_delta_90:  deltas[a.asin]?.price_delta_90  ?? null,
-      rank_delta_30:   deltas[a.asin]?.rank_delta_30   ?? null,
-      seller_delta_30: deltas[a.asin]?.seller_delta_30 ?? null,
-    }));
+  document.getElementById("dashBody").innerHTML = rows.map(r => {
+    const roiCalc = calcROI(r);
+    const roiStr = roiCalc
+      ? `<span class="${roiCalc.roi >= 0 ? 'roi-positive' : 'roi-negative'}">${roiCalc.roi.toFixed(1)}%</span>`
+      : `<span class="no-data">—</span>`;
 
-    // Search filter
-    if (search) {
-      rows = rows.filter(r =>
-        r.asin.toLowerCase().includes(search) ||
-        (r.title || "").toLowerCase().includes(search)
-      );
+    return `<tr>
+      <td><span class="asin-link" onclick="openDetail('${r.asin}')">${r.asin}</span></td>
+      <td class="title-cell" title="${r.title||''}">${r.title || '<span class="no-data">—</span>'}</td>
+      <td>${r.current_price != null ? '$'+Number(r.current_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
+      <td>${r.current_new_price != null ? '$'+Number(r.current_new_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
+      <td>${r.current_rank != null ? Number(r.current_rank).toLocaleString() : '<span class="no-data">—</span>'}</td>
+      <td>${r.current_sellers ?? '<span class="no-data">—</span>'}</td>
+      <td>${r.amazon_selling ? '<span class="badge-amz">AMZ</span>' : '<span class="no-data">—</span>'}</td>
+      <td>${r.weight != null ? Number(r.weight).toFixed(2)+' lb' : '<span class="no-data">—</span>'}</td>
+      <td>${r.cost != null ? '$'+Number(r.cost).toFixed(2) : '<span class="no-data">—</span>'}</td>
+      <td>${roiStr}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-primary btn-sm" onclick="openDetail('${r.asin}')">View</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAsin('${r.asin}')">✕</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+// ============================================================
+// ADD ASIN
+// ============================================================
+function toggleAdd() {
+  document.getElementById("addPanel").classList.toggle("open");
+}
+
+async function addAsin() {
+  const asin = document.getElementById("iAsin").value.trim().toUpperCase();
+  if (!asin || asin.length !== 10) {
+    alert("Please enter a valid 10-character ASIN.");
+    return;
+  }
+  try {
+    const res = await fetch(`${API}/asins`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        asin,
+        cost:  parseFloat(document.getElementById("iCost").value) || null,
+        notes: document.getElementById("iNotes").value.trim()
+      })
+    });
+    if (res.status === 409) { alert("ASIN already exists."); return; }
+    if (!res.ok) { const e = await res.json(); alert(e.error); return; }
+    document.getElementById("iAsin").value = "";
+    document.getElementById("iCost").value = "";
+    document.getElementById("iNotes").value = "";
+    toggleAdd();
+    await loadAsins();
+  } catch(e) { alert("Error: " + e.message); }
+}
+
+// ============================================================
+// DELETE ASIN
+// ============================================================
+async function deleteAsin(asin) {
+  if (!confirm(`Remove ${asin} from tracker?`)) return;
+  await fetch(`${API}/asins/${asin}`, { method: "DELETE" });
+  await loadAsins();
+}
+
+// ============================================================
+// SYNC KEEPA
+// ============================================================
+async function syncKeepa() {
+  const status = document.getElementById("syncStatus");
+  status.textContent = "Syncing...";
+  try {
+    const res  = await fetch(`${API}/sync`, { method: "POST" });
+    const data = await res.json();
+    if (data.errors && data.errors.length > 0) {
+      console.warn("Sync errors:", data.errors);
+    }
+    status.textContent = `Last sync: ${new Date().toLocaleTimeString()} (${data.updated} updated)`;
+    await loadAsins();
+  } catch(e) {
+    status.textContent = "Sync failed";
+    alert("Sync error: " + e.message);
+  }
+}
+
+// ============================================================
+// VELOCITY FILTER
+// ============================================================
+function getDeltaForFilter(asin, metric, period) {
+  const d = allDeltas[asin];
+  if (!d) return null;
+  const key = `${metric}_delta_${period}`;
+  return d[key] ?? null;
+}
+
+function runVelocityFilter() {
+  const priceBBDir    = document.getElementById("f_price_bb_dir").value;
+  const priceBBPeriod = document.getElementById("f_price_bb_period").value;
+  const priceNewDir   = document.getElementById("f_price_new_dir").value;
+  const priceNewPeriod= document.getElementById("f_price_new_period").value;
+  const sellersDir    = document.getElementById("f_sellers_dir").value;
+  const sellersPeriod = document.getElementById("f_sellers_period").value;
+  const rankDir       = document.getElementById("f_rank_dir").value;
+  const rankPeriod    = document.getElementById("f_rank_period").value;
+  const amazonFilter  = document.getElementById("f_amazon").value;
+  const roiFilter     = document.getElementById("f_roi").value;
+
+  let results = allAsins.filter(a => {
+    // Buy Box price direction
+    if (priceBBDir) {
+      const d = getDeltaForFilter(a.asin, "price", priceBBPeriod);
+      if (d === null) return false;
+      if (priceBBDir === "up"   && d <= 0) return false;
+      if (priceBBDir === "down" && d >= 0) return false;
     }
 
-    // Active filter
-    if (activeFilter === "priceUp") {
-      rows = rows.filter(r => r.price_delta_30 > 0);
-    } else if (activeFilter === "sellersDown") {
-      rows = rows.filter(r => r.seller_delta_30 < 0);
+    // Lowest new price direction
+    if (priceNewDir) {
+      const d = getDeltaForFilter(a.asin, "new_price", priceNewPeriod);
+      if (d === null) return false;
+      if (priceNewDir === "up"   && d <= 0) return false;
+      if (priceNewDir === "down" && d >= 0) return false;
     }
 
-    // Sort
-    if (sortKey) {
-      rows.sort((a, b) => {
-        const av = a[sortKey] ?? -Infinity;
-        const bv = b[sortKey] ?? -Infinity;
-        return typeof av === "string"
-          ? av.localeCompare(bv) * sortDir
-          : (av - bv) * sortDir;
-      });
+    // Sellers
+    if (sellersDir) {
+      const d = getDeltaForFilter(a.asin, "seller", sellersPeriod);
+      if (d === null) return false;
+      if (sellersDir === "up"   && d <= 0) return false;
+      if (sellersDir === "down" && d >= 0) return false;
     }
 
-    if (rows.length === 0) {
-      document.getElementById("tableBody").innerHTML =
-        `<tr><td colspan="13" class="status-msg">No ASINs found.</td></tr>`;
-      return;
+    // Rank (lower = better)
+    if (rankDir) {
+      const d = getDeltaForFilter(a.asin, "rank", rankPeriod);
+      if (d === null) return false;
+      if (rankDir === "down" && d >= 0) return false;
+      if (rankDir === "up"   && d <= 0) return false;
     }
 
-    document.getElementById("tableBody").innerHTML = rows.map(r => `
-      <tr>
-        <td class="asin-code">${r.asin}</td>
-        <td class="title-cell" title="${r.title || ''}">${r.title || '<span class="no-data">—</span>'}</td>
-        <td>${r.current_price != null ? '$' + Number(r.current_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
-        <td class="${deltaClass(r.price_delta_30)}">${formatDelta(r.price_delta_30, '$')}</td>
-        <td class="${deltaClass(r.price_delta_90)}">${formatDelta(r.price_delta_90, '$')}</td>
-        <td>${r.current_rank != null ? Number(r.current_rank).toLocaleString() : '<span class="no-data">—</span>'}</td>
-        <td class="${deltaClass(r.rank_delta_30, true)}">${formatDelta(r.rank_delta_30)}</td>
-        <td>${r.current_sellers ?? '<span class="no-data">—</span>'}</td>
-        <td class="${deltaClass(r.seller_delta_30, true)}">${formatDelta(r.seller_delta_30)}</td>
-        <td>${r.current_stock ?? '<span class="no-data">—</span>'}</td>
-        <td>${r.amazon_selling ? '<span class="amazon-badge">AMZ</span>' : '<span class="no-data">—</span>'}</td>
-        <td>${r.cost != null ? '$' + Number(r.cost).toFixed(2) : '<span class="no-data">—</span>'}</td>
-        <td><button class="btn-danger" onclick="deleteAsin('${r.asin}')">Remove</button></td>
-      </tr>
-    `).join("");
-  }
+    // Amazon
+    if (amazonFilter === "yes" && !a.amazon_selling) return false;
+    if (amazonFilter === "no"  &&  a.amazon_selling) return false;
 
-  // -------------------------------
-  // DELTA HELPERS
-  // -------------------------------
-  function deltaClass(val, invertLogic = false) {
-    if (val === null || val === undefined) return "no-data";
-    if (val === 0) return "delta-zero";
-    const positive = val > 0;
-    if (invertLogic) return positive ? "delta-down" : "delta-up";
-    return positive ? "delta-up" : "delta-down";
-  }
-
-  function formatDelta(val, prefix = "") {
-    if (val === null || val === undefined) return '<span class="no-data">—</span>';
-    const sign = val > 0 ? "+" : "";
-    return `${sign}${prefix}${Number(val).toFixed(2)}`;
-  }
-
-  // -------------------------------
-  // SORT
-  // -------------------------------
-  function sortBy(key) {
-    if (sortKey === key) sortDir *= -1;
-    else { sortKey = key; sortDir = 1; }
-    renderTable();
-  }
-
-  // -------------------------------
-  // FILTERS
-  // -------------------------------
-  function filterPriceUp() { activeFilter = "priceUp"; renderTable(); }
-  function filterSellersDown() { activeFilter = "sellersDown"; renderTable(); }
-  function clearFilters() {
-    activeFilter = null;
-    document.getElementById("searchInput").value = "";
-    renderTable();
-  }
-
-  // -------------------------------
-  // ADD ASIN
-  // -------------------------------
-  function toggleAddPanel() {
-    const panel = document.getElementById("addPanel");
-    panel.classList.toggle("open");
-  }
-
-  async function addAsin() {
-    const asin = document.getElementById("inputAsin").value.trim().toUpperCase();
-    if (!asin || asin.length !== 10) {
-      alert("Please enter a valid 10-character ASIN.");
-      return;
+    // ROI
+    if (roiFilter) {
+      const r = calcROI(a);
+      if (!r) return false;
+      if (roiFilter === "pos" && r.roi <= 0) return false;
+      if (roiFilter === "neg" && r.roi >= 0) return false;
+      if (!isNaN(roiFilter) && r.roi < parseFloat(roiFilter)) return false;
     }
 
-    const payload = {
-      asin,
-      title:  document.getElementById("inputTitle").value.trim(),
-      cost:   parseFloat(document.getElementById("inputCost").value) || null,
-      weight: parseFloat(document.getElementById("inputWeight").value) || null,
-      notes:  document.getElementById("inputNotes").value.trim()
-    };
+    return true;
+  });
 
-    try {
-      const res = await fetch(`${API}/asins`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  document.getElementById("velocityCount").textContent =
+    `${results.length} ASIN${results.length !== 1 ? "s" : ""} match your filters`;
 
-      if (res.status === 409) {
-        alert("This ASIN already exists in your tracker.");
-        return;
+  if (!results.length) {
+    document.getElementById("velocityBody").innerHTML =
+      `<tr><td colspan="12" class="status-msg">No ASINs match your current filters.</td></tr>`;
+    return;
+  }
+
+  document.getElementById("velocityBody").innerHTML = results.map(r => {
+    const d = allDeltas[r.asin] || {};
+    const roiCalc = calcROI(r);
+    const roiStr = roiCalc
+      ? `<span class="${roiCalc.roi >= 0 ? 'roi-positive':'roi-negative'}">${roiCalc.roi.toFixed(1)}%</span>`
+      : `<span class="no-data">—</span>`;
+
+    return `<tr>
+      <td><span class="asin-link" onclick="openDetail('${r.asin}')">${r.asin}</span></td>
+      <td class="title-cell" title="${r.title||''}">${r.title||'<span class="no-data">—</span>'}</td>
+      <td>${r.current_price != null ? '$'+Number(r.current_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
+      <td>${r.current_new_price != null ? '$'+Number(r.current_new_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
+      <td>${r.current_rank != null ? Number(r.current_rank).toLocaleString() : '<span class="no-data">—</span>'}</td>
+      <td>${r.current_sellers ?? '<span class="no-data">—</span>'}</td>
+      <td>${r.amazon_selling ? '<span class="badge-amz">AMZ</span>' : '<span class="no-data">—</span>'}</td>
+      <td>${roiStr}</td>
+      <td class="${deltaClass(d.price_delta_30)}">${fmtDelta(d.price_delta_30,'$')}</td>
+      <td class="${deltaClass(d.seller_delta_30, true)}">${fmtDelta(d.seller_delta_30)}</td>
+      <td class="${deltaClass(d.rank_delta_30, true)}">${fmtDelta(d.rank_delta_30)}</td>
+      <td><button class="btn btn-primary btn-sm" onclick="openDetail('${r.asin}')">View</button></td>
+    </tr>`;
+  }).join("");
+}
+
+function clearVelocityFilter() {
+  ["f_price_bb_dir","f_price_new_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi"]
+    .forEach(id => document.getElementById(id).value = "");
+  document.getElementById("velocityBody").innerHTML =
+    `<tr><td colspan="12" class="status-msg">Set filters above and click Run Filter</td></tr>`;
+  document.getElementById("velocityCount").textContent = "";
+}
+
+// ============================================================
+// ASIN DETAIL
+// ============================================================
+async function openDetail(asin) {
+  currentDetailAsin = asin;
+  detailPeriod = 30;
+  previousPage = document.querySelector(".page.active").id.replace("page-","");
+
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById("page-detail").classList.add("active");
+
+  const a = allAsins.find(x => x.asin === asin);
+  if (!a) return;
+
+  document.getElementById("detailAsin").textContent = asin;
+  document.getElementById("detailTitle").textContent = a.title || "No title yet — sync to populate";
+
+  // Pre-fill edit panel
+  document.getElementById("editCost").value     = a.cost || "";
+  document.getElementById("editFba").value      = a.fba_fee || "";
+  document.getElementById("editReferral").value = a.referral_fee_override || "";
+  document.getElementById("editNotes").value    = a.notes || "";
+
+  // Metrics
+  const roiCalc = calcROI(a);
+  const d = allDeltas[asin] || {};
+
+  document.getElementById("detailMetrics").innerHTML = `
+    <div class="metric-card">
+      <div class="m-label">Buy Box Price</div>
+      <div class="m-value">${a.current_price != null ? '$'+Number(a.current_price).toFixed(2) : '—'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Lowest New Price</div>
+      <div class="m-value">${a.current_new_price != null ? '$'+Number(a.current_new_price).toFixed(2) : '—'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Sales Rank</div>
+      <div class="m-value">${a.current_rank != null ? Number(a.current_rank).toLocaleString() : '—'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Sellers</div>
+      <div class="m-value">${a.current_sellers ?? '—'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Weight</div>
+      <div class="m-value">${a.weight != null ? Number(a.weight).toFixed(2)+' lb' : '—'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Category</div>
+      <div class="m-value" style="font-size:13px;">${a.category || '—'}</div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">ROI</div>
+      <div class="m-value ${roiCalc ? (roiCalc.roi >= 0 ? 'roi-positive':'roi-negative') : ''}">
+        ${roiCalc ? roiCalc.roi.toFixed(1)+'%' : '—'}
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Net Profit</div>
+      <div class="m-value ${roiCalc ? (roiCalc.netProfit >= 0 ? 'roi-positive':'roi-negative') : ''}">
+        ${roiCalc ? '$'+roiCalc.netProfit.toFixed(2) : '—'}
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="m-label">Amazon Selling?</div>
+      <div class="m-value">${a.amazon_selling ? '<span class="badge-amz">YES</span>' : 'No'}</div>
+    </div>
+  `;
+
+  // Delta table
+  document.getElementById("deltaTableBody").innerHTML = `
+    <tr>
+      <td>Buy Box Price</td>
+      <td class="${deltaClass(d.price_delta_30)}">${fmtDelta(d.price_delta_30,'$')}</td>
+      <td class="${deltaClass(d.price_delta_90)}">${fmtDelta(d.price_delta_90,'$')}</td>
+      <td class="${deltaClass(d.price_delta_180)}">${fmtDelta(d.price_delta_180,'$')}</td>
+    </tr>
+    <tr>
+      <td>Lowest New Price</td>
+      <td class="${deltaClass(d.new_price_delta_30)}">${fmtDelta(d.new_price_delta_30,'$')}</td>
+      <td class="${deltaClass(d.new_price_delta_90)}">${fmtDelta(d.new_price_delta_90,'$')}</td>
+      <td class="${deltaClass(d.new_price_delta_180)}">${fmtDelta(d.new_price_delta_180,'$')}</td>
+    </tr>
+    <tr>
+      <td>Sales Rank</td>
+      <td class="${deltaClass(d.rank_delta_30, true)}">${fmtDelta(d.rank_delta_30)}</td>
+      <td class="${deltaClass(d.rank_delta_90, true)}">${fmtDelta(d.rank_delta_90)}</td>
+      <td class="${deltaClass(d.rank_delta_180, true)}">${fmtDelta(d.rank_delta_180)}</td>
+    </tr>
+    <tr>
+      <td>Seller Count</td>
+      <td class="${deltaClass(d.seller_delta_30, true)}">${fmtDelta(d.seller_delta_30)}</td>
+      <td class="${deltaClass(d.seller_delta_90, true)}">${fmtDelta(d.seller_delta_90)}</td>
+      <td class="${deltaClass(d.seller_delta_180, true)}">${fmtDelta(d.seller_delta_180)}</td>
+    </tr>
+  `;
+
+  // Load charts
+  await loadDetailCharts(asin, detailPeriod);
+
+  // Reset period buttons
+  document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".period-btn")[0].classList.add("active");
+}
+
+async function setDetailPeriod(days, btn) {
+  detailPeriod = days;
+  document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  await loadDetailCharts(currentDetailAsin, days);
+}
+
+async function loadDetailCharts(asin, days) {
+  try {
+    const res  = await fetch(`${API}/history/${asin}?days=${days}`);
+    const data = await res.json();
+
+    const labels   = data.map(r => new Date(r.captured_at).toLocaleDateString());
+    const bbPrices = data.map(r => r.buybox_price);
+    const newPrices= data.map(r => r.new_price);
+    const ranks    = data.map(r => r.rank);
+    const sellers  = data.map(r => r.seller_count);
+
+    drawChart("chartPrice", labels, [
+      { label: "Buy Box Price", data: bbPrices,  borderColor: "#7c83ff", backgroundColor: "rgba(124,131,255,0.08)" },
+      { label: "Lowest New",   data: newPrices, borderColor: "#2ecc71", backgroundColor: "rgba(46,204,113,0.08)" }
+    ], "$", priceChart, c => priceChart = c);
+
+    drawChart("chartRank", labels, [
+      { label: "Sales Rank", data: ranks, borderColor: "#f39c12", backgroundColor: "rgba(243,156,18,0.08)" }
+    ], "", rankChart, c => rankChart = c);
+
+    drawChart("chartSellers", labels, [
+      { label: "Seller Count", data: sellers, borderColor: "#e74c3c", backgroundColor: "rgba(231,76,60,0.08)" }
+    ], "", sellersChart, c => sellersChart = c);
+
+  } catch(e) { console.error("Chart error", e); }
+}
+
+function drawChart(canvasId, labels, datasets, prefix, existingChart, setChart) {
+  if (existingChart) existingChart.destroy();
+  const ctx = document.getElementById(canvasId).getContext("2d");
+  const chart = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets: datasets.map(d => ({
+      ...d,
+      tension: 0.3,
+      pointRadius: labels.length > 60 ? 0 : 3,
+      fill: true,
+      spanGaps: true
+    }))},
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: "#aaa", font: { size: 12 } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => prefix
+              ? `${ctx.dataset.label}: ${prefix}${Number(ctx.raw||0).toFixed(2)}`
+              : `${ctx.dataset.label}: ${ctx.raw}`
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: "#666", maxTicksLimit: 10 }, grid: { color: "#1e2138" } },
+        y: { ticks: { color: "#666", callback: v => prefix ? prefix+v : v }, grid: { color: "#1e2138" } }
       }
-
-      if (!res.ok) throw new Error("Failed to add ASIN");
-
-      document.getElementById("inputAsin").value = "";
-      document.getElementById("inputTitle").value = "";
-      document.getElementById("inputCost").value = "";
-      document.getElementById("inputWeight").value = "";
-      document.getElementById("inputNotes").value = "";
-
-      toggleAddPanel();
-      await loadAsins();
-    } catch (e) {
-      alert("Error adding ASIN: " + e.message);
     }
-  }
+  });
+  setChart(chart);
+}
 
-  // -------------------------------
-  // DELETE ASIN
-  // -------------------------------
-  async function deleteAsin(asin) {
-    if (!confirm(`Remove ${asin} from your tracker?`)) return;
-    try {
-      await fetch(`${API}/asins/${asin}`, { method: "DELETE" });
-      await loadAsins();
-    } catch (e) {
-      alert("Error removing ASIN.");
-    }
-  }
+// ============================================================
+// EDIT ASIN
+// ============================================================
+function toggleEditPanel() {
+  document.getElementById("editPanel").classList.toggle("open");
+}
 
-  // -------------------------------
-  // SYNC KEEPA
-  // -------------------------------
-  async function syncKeepa() {
-    const status = document.getElementById("syncStatus");
-    status.textContent = "Syncing...";
-    try {
-      const res = await fetch(`${API}/sync`, { method: "POST" });
-      const data = await res.json();
-      status.textContent = `Last sync: ${new Date().toLocaleTimeString()} (${data.updated} updated)`;
-      await loadAsins();
-    } catch (e) {
-      status.textContent = "Sync failed";
-      alert("Sync error: " + e.message);
-    }
-  }
+async function saveAsinEdits() {
+  const payload = {};
+  const cost     = document.getElementById("editCost").value;
+  const fba      = document.getElementById("editFba").value;
+  const referral = document.getElementById("editReferral").value;
+  const notes    = document.getElementById("editNotes").value;
 
-  // -------------------------------
-  // INIT
-  // -------------------------------
-  loadAsins();
+  if (cost     !== "") payload.cost = parseFloat(cost);
+  if (fba      !== "") payload.fba_fee = parseFloat(fba);
+  if (referral !== "") payload.referral_fee_override = parseFloat(referral);
+  if (notes    !== "") payload.notes = notes;
+
+  try {
+    await fetch(`${API}/asins/${currentDetailAsin}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    toggleEditPanel();
+    await loadAsins();
+    await openDetail(currentDetailAsin);
+  } catch(e) { alert("Save error: " + e.message); }
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+async function saveSettings() {
+  const data = {
+    prep_fee:      document.getElementById("sPrepFee").value,
+    shipping_rate: document.getElementById("sShippingRate").value,
+    fba_fee:       document.getElementById("sFbaFee").value,
+  };
+  try {
+    await fetch(`${API}/settings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    settings = { ...settings, ...data };
+    const saved = document.getElementById("settingsSaved");
+    saved.style.display = "block";
+    setTimeout(() => saved.style.display = "none", 3000);
+    renderDashboard();
+  } catch(e) { alert("Error saving settings: " + e.message); }
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function deltaClass(val, invert = false) {
+  if (val == null) return "no-data";
+  if (val === 0)   return "delta-zero";
+  const pos = val > 0;
+  return (invert ? !pos : pos) ? "delta-up" : "delta-down";
+}
+
+function fmtDelta(val, prefix = "") {
+  if (val == null) return '<span class="no-data">—</span>';
+  const sign = val > 0 ? "+" : "";
+  return `${sign}${prefix}${Number(val).toFixed(2)}`;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadAll();
 </script>
 </body>
 </html>
