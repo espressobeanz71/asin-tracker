@@ -193,7 +193,8 @@
         <tr>
           <th onclick="dashSort('asin')">ASIN</th>
           <th onclick="dashSort('title')">Title</th>
-          <th onclick="dashSort('current_price')">Price</th>
+          <th onclick="dashSort('current_price')">Buy Box</th>
+          <th onclick="dashSort('current_new_price')">Lowest New</th>
           <th onclick="dashSort('current_rank')">Rank</th>
           <th onclick="dashSort('current_sellers')">Sellers</th>
           <th>Amazon?</th>
@@ -576,13 +577,13 @@ async function loadAsins() {
 }
 
 async function loadAllDeltas() {
-  try {
-    const res  = await fetch(`${API}/deltas`);
-    const data = await res.json();
-    allDeltas  = data;
-  } catch(e) {
-    console.error("Delta load error", e);
-  }
+  const promises = allAsins.map(a =>
+    fetch(`${API}/deltas/${a.asin}`)
+      .then(r => r.json())
+      .then(d => { allDeltas[a.asin] = d; })
+      .catch(() => {})
+  );
+  await Promise.all(promises);
 }
 
 function updateStats() {
@@ -632,7 +633,8 @@ function renderDashboard() {
     return `<tr>
       <td><span class="asin-link" onclick="openDetail('${r.asin}')">${r.asin}</span></td>
       <td class="title-cell" title="${r.title||''}">${r.title||'<span class="no-data">—</span>'}</td>
-      <td>${r.current_price != null ? '$'+Number(r.current_price).toFixed(2) : (r.current_new_price != null ? '$'+Number(r.current_new_price).toFixed(2) : '<span class="no-data">—</span>')}</td>
+      <td>${r.current_price != null ? '$'+Number(r.current_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
+      <td>${r.current_new_price != null ? '$'+Number(r.current_new_price).toFixed(2) : '<span class="no-data">—</span>'}</td>
       <td>${r.current_rank != null ? Number(r.current_rank).toLocaleString() : '<span class="no-data">—</span>'}</td>
       <td>${r.current_sellers ?? '<span class="no-data">—</span>'}</td>
       <td>${r.amazon_selling ? '<span class="badge-amz">AMZ</span>' : '<span class="no-data">—</span>'}</td>
@@ -917,31 +919,24 @@ function drawChart(canvasId, labels, datasets, prefix, existingChart, setChart) 
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: {
-        mode: "index",
-        intersect: false,
-      },
       plugins: {
         legend: { labels: { color: "#aaa", font: { size: 12 } } },
         tooltip: {
-          mode: "index",
-          intersect: false,
           callbacks: {
-            label: ctx => {
-              const val = ctx.raw;
-              if (val === null || val === undefined) return null;
-              return prefix
-                ? `${ctx.dataset.label}: ${prefix}${Number(val).toFixed(2)}`
-                : `${ctx.dataset.label}: ${Number(val).toLocaleString()}`;
-            }
+            label: ctx => prefix
+              ? `${ctx.dataset.label}: ${prefix}${Number(ctx.raw||0).toFixed(2)}`
+              : `${ctx.dataset.label}: ${ctx.raw}`
           }
         }
       },
       scales: {
         x: { ticks: { color: "#666", maxTicksLimit: 10 }, grid: { color: "#1e2138" } },
-        y: { ticks: { color: "#666", callback: v => prefix ? prefix+v : v.toLocaleString() }, grid: { color: "#1e2138" } }
+        y: { ticks: { color: "#666", callback: v => prefix ? prefix+v : v }, grid: { color: "#1e2138" } }
       }
     }
+  });
+  setChart(chart);
+}
 
 function toggleEditPanel() {
   document.getElementById("editPanel").classList.toggle("open");
