@@ -528,7 +528,75 @@ def sync_keepa():
 # -------------------------------
 # ROUTES - HISTORY & DELTAS
 # -------------------------------
+@app.route("/deltas", methods=["GET"])
+def get_all_deltas():
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        now = datetime.utcnow()
 
+        # Get all active ASINs
+        cur.execute("SELECT asin FROM asins WHERE is_active = TRUE")
+        asins = [row["asin"] for row in cur.fetchall()]
+
+        if not asins:
+            conn.close()
+            return jsonify({})
+
+        def get_snapshots(days_back):
+            cutoff = now - timedelta(days=days_back)
+            cur.execute("""
+                SELECT DISTINCT ON (asin) asin, buybox_price, new_price, rank, seller_count
+                FROM history
+                WHERE asin = ANY(%s) AND captured_at <= %s
+                ORDER BY asin, captured_at DESC
+            """, (asins, cutoff))
+            rows = cur.fetchall()
+            return {r["asin"]: r for r in rows}
+
+        current  = get_snapshots(0)
+        past_30  = get_snapshots(30)
+        past_90  = get_snapshots(90)
+        past_180 = get_snapshots(180)
+
+        def delta(c, p, field):
+            if not c or not p:
+                return None
+            cv = c.get(field)
+            pv = p.get(field)
+            if cv is None or pv is None:
+                return None
+            return float(cv) - float(pv)
+
+        result = {}
+        for asin in asins:
+            c = current.get(asin)
+            p30  = past_30.get(asin)
+            p90  = past_90.get(asin)
+            p180 = past_180.get(asin)
+            result[asin] = {
+                "asin": asin,
+                "price_delta_30":      delta(c, p30,  "buybox_price"),
+                "price_delta_90":      delta(c, p90,  "buybox_price"),
+                "price_delta_180":     delta(c, p180, "buybox_price"),
+                "new_price_delta_30":  delta(c, p30,  "new_price"),
+                "new_price_delta_90":  delta(c, p90,  "new_price"),
+                "new_price_delta_180": delta(c, p180, "new_price"),
+                "rank_delta_30":       delta(c, p30,  "rank"),
+                "rank_delta_90":       delta(c, p90,  "rank"),
+                "rank_delta_180":      delta(c, p180, "rank"),
+                "seller_delta_30":     delta(c, p30,  "seller_count"),
+                "seller_delta_90":     delta(c, p90,  "seller_count"),
+                "seller_delta_180":    delta(c, p180, "seller_count"),
+            }
+
+        conn.close()
+        return jsonify(result)
+
+    except Exception as e:
+        logging.error(f"Bulk deltas error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+        
 @app.route("/history/<asin>", methods=["GET"])
 def get_history(asin):
     days = request.args.get("days", 90, type=int)
