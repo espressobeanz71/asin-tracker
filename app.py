@@ -4,12 +4,13 @@
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
+from collections import defaultdict
 import psycopg2
 import psycopg2.extras
 import os
 import requests
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 app = Flask(__name__)
 CORS(app)
@@ -364,19 +365,121 @@ def sync_keepa():
                         update_vals
                     )
                     
-                # --- INSERT HISTORY ---
-                cur.execute("""
-                    INSERT INTO history 
-                        (asin, buybox_price, new_price, rank, seller_count, stock, is_amazon_selling)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (asin, buybox_price, new_price, rank, seller_count, stock, is_amazon))
+               # --- CHECK IF ASIN HAS EXISTING HISTORY ---
+                cur.execute("SELECT COUNT(*) FROM history WHERE asin = %s", (asin,))
+                history_count = cur.fetchone()[0]
+
+                if history_count == 0:
+                    # Brand new ASIN — back-fill 180 days of history
+                    logging.debug(f"{asin}: No history found, back-filling 180 days")
+
+                    # Build a lookup of date -> values from Keepa arrays
+                    # Keepa timestamps are minutes since 2011-01-01
+                    KEEPA_EPOCH = datetime(2011, 1, 1)
+                    cutoff = datetime.utcnow() - timedelta(days=180)
+
+                    def extract_keepa_series(arr):
+                        """Extract [(datetime, value)] from Keepa [ts, val, ts, val...] array"""
+                        series = []
+                        if not arr or len(arr) < 2:
+                            return series
+                        for i in range(0, len(arr) - 1, 2):
+                            ts  = arr[i]
+                            val = arr[i + 1]
+                            if ts is None or val is None:
+                                continue
+                            dt = KEEPA_EPOCH + timedelta(minutes=ts)
+                            if dt < cutoff:
+                                continue
+                            if val in (-1, 0) or val > 1000000:
+                                val = None
+                            else:
+                                val = val / 100 if val > 100 else val
+                            series.append((dt, val))
+                        return series
+
+                    def extract_keepa_int_series(arr):
+                        """Same but for rank/seller counts (no /100)"""
+                        series = []
+                        if not arr or len(arr) < 2:
+                            return series
+                        for i in range(0, len(arr) - 1, 2):
+                            ts  = arr[i]
+                            val = arr[i + 1]
+                            if ts is None or val is None:
+                                continue
+                            dt = KEEPA_EPOCH + timedelta(minutes=ts)
+                            if dt < cutoff:
+                                continue
+                            if val == -1:
+                                val = None
+                            series.append((dt, val))
+                        return series
+
+                    bb_series     = extract_keepa_series(csv[18] if len(csv) > 18 else [])
+                    new_series    = extract_keepa_series(csv[1]  if len(csv) > 1  else [])
+                    rank_series   = extract_keepa_int_series(csv[3]  if len(csv) > 3  else [])
+                    seller_series = extract_keepa_int_series(csv[11] if len(csv) > 11 else [])
+
+                    # Build daily snapshots by date
+                    from collections import defaultdict
+                    daily = defaultdict(lambda: {
+                        "buybox_price": None,
+                        "new_price": None,
+                        "rank": None,
+                        "seller_count": None
+                    })
+
+                    for dt, val in bb_series:
+                        day = dt.date()
+                        if daily[day]["buybox_price"] is None:
+                            daily[day]["buybox_price"] = val
+
+                    for dt, val in new_series:
+                        day = dt.date()
+                        if daily[day]["new_price"] is None:
+                            daily[day]["new_price"] = val
+
+                    for dt, val in rank_series:
+                        day = dt.date()
+                        if daily[day]["rank"] is None:
+                            daily[day]["rank"] = val
+
+                    for dt, val in seller_series:
+                        day = dt.date()
+                        if daily[day]["seller_count"] is None:
+                            daily[day]["seller_count"] = val
+
+                    # Insert one row per day
+                    for day, vals in sorted(daily.items()):
+                        snap_dt = datetime.combine(day, datetime.min.time())
+                        cur.execute("""
+                            INSERT INTO history
+                                (asin, captured_at, buybox_price, new_price, rank, seller_count, stock, is_amazon_selling)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                            ON CONFLICT DO NOTHING
+                        """, (
+                            asin,
+                            snap_dt,
+                            vals["buybox_price"],
+                            vals["new_price"],
+                            vals["rank"],
+                            vals["seller_count"],
+                            None,
+                            is_amazon
+                        ))
+
+                    logging.debug(f"{asin}: Back-filled {len(daily)} days of history")
+
+                else:
+                    # Existing ASIN — just insert today's snapshot
+                    cur.execute("""
+                        INSERT INTO history
+                            (asin, buybox_price, new_price, rank, seller_count, stock, is_amazon_selling)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """, (asin, buybox_price, new_price, rank, seller_count, stock, is_amazon))
 
                 updated += 1
-                logging.debug(
-                    f"{asin}: buybox={buybox_price}, new={new_price}, "
-                    f"rank={rank}, sellers={seller_count}, stock={stock}, "
-                    f"weight={weight_lbs}, amazon={is_amazon}"
-                )
 
             conn.commit()
             conn.close()
