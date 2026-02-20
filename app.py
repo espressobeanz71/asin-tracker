@@ -379,23 +379,47 @@ def sync_keepa():
                     cutoff = datetime.utcnow() - timedelta(days=180)
 
                     def extract_keepa_series(arr):
-                        """Extract [(datetime, value)] from Keepa [ts, val, ts, val...] array"""
+                        """Extract [(datetime, value)] from Keepa price array - values in cents"""
                         series = []
                         if not arr or len(arr) < 2:
                             return series
                         for i in range(0, len(arr) - 1, 2):
-                            ts  = arr[i]
-                            val = arr[i + 1]
-                            if ts is None or val is None:
+                            try:
+                                ts  = arr[i]
+                                val = arr[i + 1]
+                                if ts is None or val is None:
+                                    continue
+                                dt = KEEPA_EPOCH + timedelta(minutes=int(ts))
+                                if dt < cutoff:
+                                    continue
+                                if val in (-1, 0) or val > 1000000:
+                                    series.append((dt, None))
+                                else:
+                                    series.append((dt, round(val / 100, 2)))
+                            except Exception:
                                 continue
-                            dt = KEEPA_EPOCH + timedelta(minutes=ts)
-                            if dt < cutoff:
+                        return series
+
+                    def extract_keepa_int_series(arr):
+                        """Extract [(datetime, value)] from Keepa int array - rank/sellers"""
+                        series = []
+                        if not arr or len(arr) < 2:
+                            return series
+                        for i in range(0, len(arr) - 1, 2):
+                            try:
+                                ts  = arr[i]
+                                val = arr[i + 1]
+                                if ts is None or val is None:
+                                    continue
+                                dt = KEEPA_EPOCH + timedelta(minutes=int(ts))
+                                if dt < cutoff:
+                                    continue
+                                if val == -1:
+                                    series.append((dt, None))
+                                else:
+                                    series.append((dt, int(val)))
+                            except Exception:
                                 continue
-                            if val in (-1, 0) or val > 1000000:
-                                val = None
-                            else:
-                                val = val / 100 if val > 100 else val
-                            series.append((dt, val))
                         return series
 
                     def extract_keepa_int_series(arr):
@@ -416,10 +440,10 @@ def sync_keepa():
                             series.append((dt, val))
                         return series
 
-                    bb_series     = extract_keepa_series(csv[18] if len(csv) > 18 else [])
-                    new_series    = extract_keepa_series(csv[1]  if len(csv) > 1  else [])
-                    rank_series   = extract_keepa_int_series(csv[3]  if len(csv) > 3  else [])
-                    seller_series = extract_keepa_int_series(csv[11] if len(csv) > 11 else [])
+                    bb_series     = extract_keepa_series(csv[18] if len(csv) > 18 and csv[18] else [])
+                    new_series    = extract_keepa_series(csv[1]  if len(csv) > 1  and csv[1]  else [])
+                    rank_series   = extract_keepa_int_series(csv[3]  if len(csv) > 3  and csv[3]  else [])
+                    seller_series = extract_keepa_int_series(csv[11] if len(csv) > 11 and csv[11] else [])
 
                     # Build daily snapshots by date
                     from collections import defaultdict
