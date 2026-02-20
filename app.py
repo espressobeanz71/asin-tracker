@@ -551,9 +551,8 @@ def get_all_deltas():
                 FROM history
                 WHERE asin = ANY(%s) 
                 AND captured_at <= %s
-                AND captured_at >= %s
                 ORDER BY asin, captured_at DESC
-            """, (asins, cutoff, cutoff - timedelta(days=10)))
+            """, (asins, cutoff))
             rows = cur.fetchall()
             return {r["asin"]: r for r in rows}
 
