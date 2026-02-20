@@ -279,15 +279,12 @@ def sync_keepa():
               # --- BUY BOX PRICE (csv index 18) ---
                 buybox_price = None
                 if len(csv) > 18 and csv[18] and len(csv[18]) >= 2:
-                    # Keepa CSV: [timestamp, value, timestamp, value...]
-                    # Values are at odd indexes (1, 3, 5...)
                     prices = [csv[18][i] for i in range(1, len(csv[18]), 2)
                               if csv[18][i] not in (-1, 0) and csv[18][i] < 1000000]
                     if prices:
                         buybox_price = prices[-1] / 100
 
                 # --- NEW PRICE / LOWEST NEW (csv index 1) ---
-                # Only use if no buy box price available
                 new_price = None
                 if len(csv) > 1 and csv[1] and len(csv[1]) >= 2:
                     prices = [csv[1][i] for i in range(1, len(csv[1]), 2)
