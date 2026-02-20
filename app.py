@@ -546,11 +546,14 @@ def get_all_deltas():
         def get_snapshots(days_back):
             cutoff = now - timedelta(days=days_back)
             cur.execute("""
-                SELECT DISTINCT ON (asin) asin, buybox_price, new_price, rank, seller_count
+                SELECT DISTINCT ON (asin) 
+                    asin, buybox_price, new_price, rank, seller_count
                 FROM history
-                WHERE asin = ANY(%s) AND captured_at <= %s
+                WHERE asin = ANY(%s) 
+                AND captured_at <= %s
+                AND captured_at >= %s
                 ORDER BY asin, captured_at DESC
-            """, (asins, cutoff))
+            """, (asins, cutoff, cutoff - timedelta(days=10)))
             rows = cur.fetchall()
             return {r["asin"]: r for r in rows}
 
@@ -603,7 +606,8 @@ def get_history(asin):
     conn = get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cur.execute("""
-        SELECT * FROM history
+        SELECT captured_at, buybox_price, new_price, rank, seller_count
+        FROM history
         WHERE asin = %s
         AND captured_at >= NOW() - INTERVAL '%s days'
         ORDER BY captured_at ASC
@@ -611,7 +615,6 @@ def get_history(asin):
     rows = cur.fetchall()
     conn.close()
     return jsonify(rows)
-
 
 @app.route("/deltas/<asin>", methods=["GET"])
 def get_deltas(asin):
