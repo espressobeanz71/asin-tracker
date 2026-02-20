@@ -474,24 +474,30 @@ def sync_keepa():
                         if daily[day]["seller_count"] is None:
                             daily[day]["seller_count"] = val
 
-                    # Insert one row per day
-                    for day, vals in sorted(daily.items()):
-                        snap_dt = datetime.combine(day, datetime.min.time())
-                        cur.execute("""
+                    # Insert all days in one bulk operation
+                    if daily:
+                        bulk_rows = []
+                        for day, vals in sorted(daily.items()):
+                            snap_dt = datetime.combine(day, datetime.min.time())
+                            bulk_rows.append((
+                                asin,
+                                snap_dt,
+                                vals["buybox_price"],
+                                vals["new_price"],
+                                vals["rank"],
+                                vals["seller_count"],
+                                None,
+                                is_amazon
+                            ))
+
+                        psycopg2.extras.execute_values(cur, """
                             INSERT INTO history
                                 (asin, captured_at, buybox_price, new_price, rank, seller_count, stock, is_amazon_selling)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                            VALUES %s
                             ON CONFLICT DO NOTHING
-                        """, (
-                            asin,
-                            snap_dt,
-                            vals["buybox_price"],
-                            vals["new_price"],
-                            vals["rank"],
-                            vals["seller_count"],
-                            None,
-                            is_amazon
-                        ))
+                        """, bulk_rows)
+
+                        logging.debug(f"{asin}: Back-filled {len(bulk_rows)} days of history")
 
                     logging.debug(f"{asin}: Back-filled {len(daily)} days of history")
 
