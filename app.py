@@ -369,9 +369,9 @@ def sync_keepa():
                 cur.execute("SELECT COUNT(*) FROM history WHERE asin = %s", (asin,))
                 history_count = cur.fetchone()[0]
 
-                if history_count == 0:
-                    # Brand new ASIN — back-fill 180 days of history
-                    logging.debug(f"{asin}: No history found, back-filling 180 days")
+                if history_count < 30:
+                    # Not enough history — back-fill 180 days
+                    logging.debug(f"{asin}: Less than 30 days history found, back-filling 180 days")
 
                     # Build a lookup of date -> values from Keepa arrays
                     # Keepa timestamps are minutes since 2011-01-01
