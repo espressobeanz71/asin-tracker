@@ -576,13 +576,13 @@ async function loadAsins() {
 }
 
 async function loadAllDeltas() {
-  const promises = allAsins.map(a =>
-    fetch(`${API}/deltas/${a.asin}`)
-      .then(r => r.json())
-      .then(d => { allDeltas[a.asin] = d; })
-      .catch(() => {})
-  );
-  await Promise.all(promises);
+  try {
+    const res  = await fetch(`${API}/deltas`);
+    const data = await res.json();
+    allDeltas  = data;
+  } catch(e) {
+    console.error("Delta load error", e);
+  }
 }
 
 function updateStats() {
@@ -917,24 +917,31 @@ function drawChart(canvasId, labels, datasets, prefix, existingChart, setChart) 
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: "index",
+        intersect: false,
+      },
       plugins: {
         legend: { labels: { color: "#aaa", font: { size: 12 } } },
         tooltip: {
+          mode: "index",
+          intersect: false,
           callbacks: {
-            label: ctx => prefix
-              ? `${ctx.dataset.label}: ${prefix}${Number(ctx.raw||0).toFixed(2)}`
-              : `${ctx.dataset.label}: ${ctx.raw}`
+            label: ctx => {
+              const val = ctx.raw;
+              if (val === null || val === undefined) return null;
+              return prefix
+                ? `${ctx.dataset.label}: ${prefix}${Number(val).toFixed(2)}`
+                : `${ctx.dataset.label}: ${Number(val).toLocaleString()}`;
+            }
           }
         }
       },
       scales: {
         x: { ticks: { color: "#666", maxTicksLimit: 10 }, grid: { color: "#1e2138" } },
-        y: { ticks: { color: "#666", callback: v => prefix ? prefix+v : v }, grid: { color: "#1e2138" } }
+        y: { ticks: { color: "#666", callback: v => prefix ? prefix+v : v.toLocaleString() }, grid: { color: "#1e2138" } }
       }
     }
-  });
-  setChart(chart);
-}
 
 function toggleEditPanel() {
   document.getElementById("editPanel").classList.toggle("open");
