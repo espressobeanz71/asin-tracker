@@ -887,11 +887,15 @@ async function loadDetailCharts(asin, days) {
   try {
     const res  = await fetch(`${API}/history/${asin}?days=${days}`);
     const data = await res.json();
-    const labels    = data.map(r => new Date(r.captured_at).toLocaleDateString());
-    const bbPrices  = data.map(r => r.buybox_price);
-    const newPrices = data.map(r => r.new_price);
-    const ranks     = data.map(r => r.rank);
-    const sellers   = data.map(r => r.seller_count);
+
+    // Downsample based on time period to reduce noise
+    const sampled = downsample(data, days);
+
+    const labels    = sampled.map(r => new Date(r.captured_at).toLocaleDateString());
+    const bbPrices  = sampled.map(r => r.buybox_price);
+    const newPrices = sampled.map(r => r.new_price);
+    const ranks     = sampled.map(r => r.rank);
+    const sellers   = sampled.map(r => r.seller_count);
 
     drawChart("chartPrice", labels, [
       { label: "Buy Box Price", data: bbPrices,  borderColor: "#7c83ff", backgroundColor: "rgba(124,131,255,0.08)" },
@@ -905,9 +909,55 @@ async function loadDetailCharts(asin, days) {
     drawChart("chartSellers", labels, [
       { label: "Seller Count", data: sellers, borderColor: "#e74c3c", backgroundColor: "rgba(231,76,60,0.08)" }
     ], "", sellersChart, c => sellersChart = c);
+
   } catch(e) { console.error("Chart error", e); }
 }
 
+function downsample(data, days) {
+  // 30d — no downsampling, show every point
+  if (days <= 30) return data;
+
+  // Determine bucket size in days
+  const bucketDays = days <= 90 ? 7 : 14;
+
+  // Group data into buckets and average each bucket
+  const buckets = {};
+
+  data.forEach(row => {
+    const dt = new Date(row.captured_at);
+    // Round down to nearest bucket
+    const bucketMs   = bucketDays * 24 * 60 * 60 * 1000;
+    const bucketKey  = Math.floor(dt.getTime() / bucketMs) * bucketMs;
+    if (!buckets[bucketKey]) {
+      buckets[bucketKey] = {
+        captured_at:  new Date(bucketKey).toISOString(),
+        buybox_price: [],
+        new_price:    [],
+        rank:         [],
+        seller_count: []
+      };
+    }
+    if (row.buybox_price  != null) buckets[bucketKey].buybox_price.push(row.buybox_price);
+    if (row.new_price     != null) buckets[bucketKey].new_price.push(row.new_price);
+    if (row.rank          != null) buckets[bucketKey].rank.push(row.rank);
+    if (row.seller_count  != null) buckets[bucketKey].seller_count.push(row.seller_count);
+  });
+
+  // Average each bucket
+  return Object.values(buckets)
+    .sort((a, b) => new Date(a.captured_at) - new Date(b.captured_at))
+    .map(b => ({
+      captured_at:  b.captured_at,
+      buybox_price: b.buybox_price.length  ? avg(b.buybox_price)  : null,
+      new_price:    b.new_price.length     ? avg(b.new_price)     : null,
+      rank:         b.rank.length          ? Math.round(avg(b.rank)) : null,
+      seller_count: b.seller_count.length  ? Math.round(avg(b.seller_count)) : null,
+    }));
+}
+
+function avg(arr) {
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
 function drawChart(canvasId, labels, datasets, prefix, existingChart, setChart) {
   if (existingChart) existingChart.destroy();
   const ctx   = document.getElementById(canvasId).getContext("2d");
