@@ -577,13 +577,13 @@ async function loadAsins() {
 }
 
 async function loadAllDeltas() {
-  const promises = allAsins.map(a =>
-    fetch(`${API}/deltas/${a.asin}`)
-      .then(r => r.json())
-      .then(d => { allDeltas[a.asin] = d; })
-      .catch(() => {})
-  );
-  await Promise.all(promises);
+  try {
+    const res  = await fetch(`${API}/deltas`);
+    const data = await res.json();
+    allDeltas  = data;
+  } catch(e) {
+    console.error("Delta load error", e);
+  }
 }
 
 function updateStats() {
