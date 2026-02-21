@@ -158,7 +158,7 @@
       <span style="font-weight:600;font-size:14px;">Manage ASINs</span>
       <button class="btn btn-primary" onclick="toggleAdd()">+ Add ASIN</button>
     </div>
-    <div class="collapsible" id="addPanel" style="margin-top:16px;">
+   <div class="collapsible" id="addPanel" style="margin-top:16px;">
       <div class="form-row">
         <div class="form-group">
           <label>ASIN *</label>
@@ -173,12 +173,36 @@
           <input type="text" id="iNotes" placeholder="Optional"/>
         </div>
       </div>
+
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+          Purchase Source (optional)
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Supplier Name</label>
+            <input type="text" id="iSupplier" placeholder="e.g. Walmart"/>
+          </div>
+          <div class="form-group" style="flex:2;">
+            <label>URL</label>
+            <input type="text" id="iSourceUrl" placeholder="https://..."/>
+          </div>
+          <div class="form-group">
+            <label>Source Cost ($)</label>
+            <input type="number" id="iSourceCost" placeholder="0.00" step="0.01"/>
+          </div>
+          <div class="form-group">
+            <label>Source Notes</label>
+            <input type="text" id="iSourceNotes" placeholder="Optional"/>
+          </div>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button class="btn btn-primary" onclick="addAsin()">Add ASIN</button>
         <button class="btn btn-muted" onclick="toggleAdd()">Cancel</button>
       </div>
     </div>
-  </div>
 
   <div style="margin-bottom:14px;display:flex;gap:10px;align-items:center;">
     <input type="text" id="dashSearch" placeholder="Search ASIN or title..."
@@ -652,7 +676,10 @@ function toggleAdd() {
 
 async function addAsin() {
   const asin = document.getElementById("iAsin").value.trim().toUpperCase();
-  if (!asin || asin.length !== 10) { alert("Please enter a valid 10-character ASIN."); return; }
+  if (!asin || asin.length !== 10) {
+    alert("Please enter a valid 10-character ASIN.");
+    return;
+  }
   try {
     const res = await fetch(`${API}/asins`, {
       method: "POST",
@@ -665,14 +692,37 @@ async function addAsin() {
     });
     if (res.status === 409) { alert("ASIN already exists."); return; }
     if (!res.ok) { const e = await res.json(); alert(e.error); return; }
-    document.getElementById("iAsin").value  = "";
-    document.getElementById("iCost").value  = "";
-    document.getElementById("iNotes").value = "";
+
+    // If a source URL was entered, save it too
+    const sourceUrl = document.getElementById("iSourceUrl").value.trim();
+    if (sourceUrl) {
+      await fetch(`${API}/sources`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          asin,
+          supplier_name: document.getElementById("iSupplier").value.trim(),
+          url:           sourceUrl,
+          cost:          parseFloat(document.getElementById("iSourceCost").value) || null,
+          notes:         document.getElementById("iSourceNotes").value.trim()
+        })
+      });
+    }
+
+    // Clear all fields
+    document.getElementById("iAsin").value        = "";
+    document.getElementById("iCost").value        = "";
+    document.getElementById("iNotes").value       = "";
+    document.getElementById("iSupplier").value    = "";
+    document.getElementById("iSourceUrl").value   = "";
+    document.getElementById("iSourceCost").value  = "";
+    document.getElementById("iSourceNotes").value = "";
+
     toggleAdd();
     await loadAsins();
   } catch(e) { alert("Error: " + e.message); }
 }
-
+  
 async function deleteAsin(asin) {
   if (!confirm(`Remove ${asin} from tracker?`)) return;
   await fetch(`${API}/asins/${asin}`, { method: "DELETE" });
