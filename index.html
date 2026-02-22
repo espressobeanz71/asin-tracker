@@ -44,7 +44,7 @@
     .form-actions { display: flex; gap: 10px; margin-top: 16px; }
     .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead th { background: #12152a; padding: 11px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); white-space: nowrap; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+    thead th { background: #12152a; padding: 11px 14px; text-align: left; font-size: 11px; text-transform: uppercase; ter-spacing: 0.5px; color: var(--accent); white-space: nowrap; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
     thead th:hover { background: #1a1d3a; }
     tbody tr { border-bottom: 1px solid #1e2138; transition: background 0.15s; }
     tbody tr:hover { background: #1e2240; }
@@ -73,10 +73,10 @@
     .product-image { width: 120px; height: 120px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); background: #fff; padding: 6px; }
     .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
     .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-    .metric-card .m-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .metric-card .m-label { font-size: 11px; color: var(--muted); text-transform: uppercase; ter-spacing: 0.5px; margin-bottom: 6px; }
     .metric-card .m-value { font-size: 20px; font-weight: 700; color: var(--text); }
     .delta-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .delta-table th { background: #12152a; padding: 10px 14px; text-align: left; font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    .delta-table th { background: #12152a; padding: 10px 14px; text-align: left; font-size: 11px; color: var(--accent); text-transform: uppercase; ter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
     .delta-table td { padding: 10px 14px; border-bottom: 1px solid #1e2138; }
     .chart-container { position: relative; height: 280px; margin-bottom: 8px; }
     .period-btns { display: flex; gap: 8px; margin-bottom: 16px; }
@@ -90,10 +90,30 @@
     .source-link:hover { text-decoration: underline; }
     .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
     .setting-item { display: flex; flex-direction: column; gap: 6px; }
-    .setting-item label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .setting-item label { font-size: 12px; color: var(--muted); text-transform: uppercase; ter-spacing: 0.5px; }
     .setting-item input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; color: var(--text); font-size: 14px; }
     .setting-item input:focus { outline: none; border-color: var(--accent); }
     .setting-item .hint { font-size: 11px; color: #555; }
+    .autocompe-wrap { position: relative; }
+    .autocompe-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 0 0 6px 6px;
+      z-index: 100;
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .autocomplete-item {
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .autocomplete-item:hover { background: var(--border); }
   </style>
 </head>
 <body>
@@ -142,9 +162,13 @@
       <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
         <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Purchase Source (optional)</div>
         <div class="form-row">
-          <div class="form-group">
+         <div class="form-group autocomplete-wrap">
             <label>Supplier Name</label>
-            <input type="text" id="iSupplier" placeholder="e.g. Walmart"/>
+            <input type="text" id="iSupplier" placeholder="e.g. Walmart"
+              oninput="showSupplierSuggestions(this.value)"
+              onblur="setTimeout(hideSupplierSuggestions, 200)"
+              autocomplete="off"/>
+            <div class="autocomplete-list" id="supplierSuggestions" style="display:none;"></div>
           </div>
           <div class="form-group" style="flex:2;">
             <label>URL</label>
@@ -239,6 +263,12 @@
           <option value="30">30d</option>
           <option value="90">90d</option>
           <option value="180">180d</option>
+        </select>
+      </div>
+      <div class="filter-row">
+        <label>Supplier</label>
+        <select id="f_supplier" style="flex:2;">
+          <option value="">Any</option>
         </select>
       </div>
       <div class="filter-row">
@@ -436,6 +466,7 @@
 <script>
 const API = "https://asin-tracker.onrender.com";
 
+let allSources = {};
 let allAsins = [];
 let allDeltas = {};
 let settings = { prep_fee: 0, shipping_rate: 0, fba_fee: 3.22 };
@@ -498,7 +529,7 @@ function goBack() {
 }
 
 async function loadAll() {
-  await Promise.all([loadSettings(), loadAsins()]);
+  await Promise.all([loadSettings(), loadAsins(), loadAllSources()]);
 }
 
 async function loadSettings() {
@@ -533,6 +564,54 @@ async function loadAllDeltas() {
   } catch(e) { console.error("Delta load error", e); }
 }
 
+async function loadAllSources() {
+  try {
+    const res  = await fetch(API + "/sources");
+    const data = await res.json();
+    // Group by asin
+    allSources = {};
+    data.forEach(function(s) {
+      if (!allSources[s.asin]) allSources[s.asin] = [];
+      allSources[s.asin].push(s);
+    });
+    // Populate supplier dropdown and autocomplete list
+    const suppliers = [...new Set(data.map(function(s) { return s.supplier_name; }).filter(Boolean))].sort();
+    knownSuppliers = suppliers;
+    const select = document.getElementById("f_supplier");
+    select.innerHTML = "<option value=''>Any</option>";
+    suppliers.forEach(function(name) {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      select.appendChild(opt);
+    });
+  } catch(e) { console.error("Load all sources error", e); }
+}
+
+let knownSuppliers = [];
+
+function showSupplierSuggestions(val) {
+  const list = document.getElementById("supplierSuggestions");
+  if (!val || !knownSuppliers.length) { list.style.display = "none"; return; }
+  const matches = knownSuppliers.filter(function(s) {
+    return s.toLowerCase().includes(val.toLowerCase());
+  });
+  if (!matches.length) { list.style.display = "none"; return; }
+  list.innerHTML = matches.map(function(s) {
+    return "<div class='autocomplete-item' onmousedown=\"pickSupplier('" + s.replace(/'/g, "\\'") + "')\">" + s + "</div>";
+  }).join("");
+  list.style.display = "block";
+}
+
+function hideSupplierSuggestions() {
+  document.getElementById("supplierSuggestions").style.display = "none";
+}
+
+function pickSupplier(name) {
+  document.getElementById("iSupplier").value = name;
+  hideSupplierSuggestions();
+}
+  
 function updateStats() {
   document.getElementById("statTotal").textContent = allAsins.length;
   document.getElementById("statAmazon").textContent =
@@ -688,6 +767,7 @@ function runVelocityFilter() {
   const rankPeriod    = document.getElementById("f_rank_period").value;
   const amazonFilter  = document.getElementById("f_amazon").value;
   const roiFilter     = document.getElementById("f_roi").value;
+  const supplierFilter = document.getElementById("f_supplier").value;
 
   const results = allAsins.filter(function(a) {
     if (priceBBDir) {
@@ -707,6 +787,10 @@ function runVelocityFilter() {
       if (d === null) return false;
       if (rankDir === "down" && d >= 0) return false;
       if (rankDir === "up"   && d <= 0) return false;
+    }
+    if (supplierFilter) {
+      const sources = allSources[a.asin] || [];
+      if (!sources.some(function(s) { return s.supplier_name === supplierFilter; })) return false;
     }
     if (amazonFilter === "yes" && !a.amazon_selling) return false;
     if (amazonFilter === "no"  &&  a.amazon_selling) return false;
@@ -754,7 +838,7 @@ function runVelocityFilter() {
 }
 
 function clearVelocityFilter() {
-  ["f_price_bb_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi"]
+  ["f_price_bb_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi","f_supplier"]
     .forEach(function(id) { document.getElementById(id).value = ""; });
   document.getElementById("velocityBody").innerHTML =
     "<tr><td colspan='11' class='status-msg'>Set filters above and click Run Filter</td></tr>";
