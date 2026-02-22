@@ -114,6 +114,8 @@
       color: var(--text);
     }
     .autocomplete-item:hover { background: var(--border); }
+    .clickable-stat { cursor: pointer; transition: border-color 0.2s, transform 0.1s; }
+    .clickable-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
   </style>
 </head>
 <body>
@@ -133,10 +135,14 @@
 <div class="page active" id="page-dashboard">
   <div class="stats-bar">
     <div class="stat-card"><div class="num" id="statTotal">&#8212;</div><div class="lbl">Total ASINs</div></div>
-    <div class="stat-card"><div class="num" id="statAmazon">&#8212;</div><div class="lbl">Amazon Selling</div></div>
-    <div class="stat-card"><div class="num" id="statPriceUp">&#8212;</div><div class="lbl">Price Up 30d</div></div>
-    <div class="stat-card"><div class="num" id="statSellersDown">&#8212;</div><div class="lbl">Sellers Down 30d</div></div>
-    <div class="stat-card"><div class="num" id="statRoiPos">&#8212;</div><div class="lbl">Positive ROI</div></div>
+    <div class="stat-card clickable-stat" onclick="quickFilter('amazon')" title="Click to filter">
+      <div class="num" id="statAmazon">&#8212;</div><div class="lbl">Amazon Selling</div></div>
+    <div class="stat-card clickable-stat" onclick="quickFilter('priceUp')" title="Click to filter">
+      <div class="num" id="statPriceUp">&#8212;</div><div class="lbl">Price Up 30d</div></div>
+    <div class="stat-card clickable-stat" onclick="quickFilter('sellersDown')" title="Click to filter">
+      <div class="num" id="statSellersDown">&#8212;</div><div class="lbl">Sellers Down 30d</div></div>
+    <div class="stat-card clickable-stat" onclick="quickFilter('roiPos')" title="Click to filter">
+      <div class="num" id="statRoiPos">&#8212;</div><div class="lbl">Positive ROI</div></div>
   </div>
 
   <div class="panel" style="margin-bottom:16px;">
@@ -1144,6 +1150,32 @@ function fmtDelta(val, prefix) {
   return sign + prefix + Number(val).toFixed(2);
 }
 
+function quickFilter(type) {
+  // Reset all filters first
+  ["f_price_bb_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi","f_supplier"]
+    .forEach(function(id) { document.getElementById(id).value = ""; });
+  document.getElementById("f_price_bb_period").value = "30";
+  document.getElementById("f_sellers_period").value  = "30";
+  document.getElementById("f_rank_period").value     = "30";
+
+  // Apply the relevant filter
+  if (type === "amazon") {
+    document.getElementById("f_amazon").value = "yes";
+  } else if (type === "priceUp") {
+    document.getElementById("f_price_bb_dir").value    = "up";
+    document.getElementById("f_price_bb_period").value = "30";
+  } else if (type === "sellersDown") {
+    document.getElementById("f_sellers_dir").value    = "down";
+    document.getElementById("f_sellers_period").value = "30";
+  } else if (type === "roiPos") {
+    document.getElementById("f_roi").value = "pos";
+  }
+
+  // Switch to velocity page and run the filter
+  showPage("velocity");
+  runVelocityFilter();
+}
+  
 loadAll();
 </script>
 </body>
