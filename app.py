@@ -764,6 +764,24 @@ def update_source(source_id):
         logging.error(f"Update source error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route("/sources", methods=["GET"])
+def get_all_sources():
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("""
+            SELECT s.* FROM sources s
+            JOIN asins a ON s.asin = a.asin
+            WHERE a.is_active = TRUE
+            ORDER BY s.supplier_name ASC
+        """)
+        rows = cur.fetchall()
+        conn.close()
+        return jsonify(rows)
+    except Exception as e:
+        logging.error(f"Get all sources error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 # -------------------------------
 # SERVE FRONTEND
 # -------------------------------
