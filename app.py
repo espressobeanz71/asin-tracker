@@ -333,6 +333,9 @@ def sync_keepa():
                 # --- TITLE ---
                 title = product.get("title", "")
 
+                # --- BRAND ---
+                brand = product.get("brand", "")
+
                 # --- IMAGE ---
                 image_url = None
                 images = product.get("imagesCSV", "")
@@ -348,6 +351,9 @@ def sync_keepa():
                 if title:
                     update_fields.append("title = %s")
                     update_vals.append(title)
+                if brand:
+                    update_fields.append("brand = %s")
+                    update_vals.append(brand)
                 if weight_lbs is not None:
                     update_fields.append("weight = %s")
                     update_vals.append(weight_lbs)
