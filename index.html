@@ -675,9 +675,9 @@ function renderDashboard() {
       "<td>" + (r.brand || "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (price != null ? "$" + Number(price).toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.current_rank != null ? Number(r.current_rank).toLocaleString() : "<span class='no-data'>-</span>") + "</td>" +
+      "<td style='" + (r.amazon_selling ? "background:rgba(243,156,18,0.25);font-weight:700;" : "") + "'>" + (r.current_sellers != null ? r.current_sellers : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.weight != null ? Number(r.weight).toFixed(2) + " lb" : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.cost != null ? "$" + Number(r.cost).toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
-      "<td style='" + (r.amazon_selling ? "background:rgba(243,156,18,0.25);font-weight:700;" : "") + "'>" + (r.current_sellers != null ? r.current_sellers : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + roiStr + "</td>" +
       "<td style='display:flex;gap:6px;'>" +
         "<button class='btn btn-primary btn-sm' onclick=\"openDetail('" + r.asin + "')\">View</button>" +
