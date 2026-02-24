@@ -214,7 +214,6 @@
           <th onclick="dashSort('current_price')">Price</th>
           <th onclick="dashSort('current_rank')">Rank</th>
           <th onclick="dashSort('current_sellers')">Sellers</th>
-          <th>Amazon?</th>
           <th onclick="dashSort('weight')">Weight</th>
           <th onclick="dashSort('cost')">Cost</th>
           <th onclick="dashSort('roi')">ROI</th>
@@ -222,7 +221,7 @@
         </tr>
       </thead>
       <tbody id="dashBody">
-        <tr><td colspan="11" class="status-msg">Loading...</td></tr>
+        <tr><td colspan="10" class="status-msg">Loading...</td></tr>
       </tbody>
     </table>
   </div>
@@ -661,7 +660,7 @@ function renderDashboard() {
   }
   if (!rows.length) {
     document.getElementById("dashBody").innerHTML =
-      "<tr><td colspan='11' class='status-msg'>No ASINs found.</td></tr>";
+      "<tr><td colspan='10' class='status-msg'>No ASINs found.</td></tr>";
     return;
   }
   const html = rows.map(function(r) {
@@ -676,10 +675,9 @@ function renderDashboard() {
       "<td>" + (r.brand || "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (price != null ? "$" + Number(price).toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.current_rank != null ? Number(r.current_rank).toLocaleString() : "<span class='no-data'>-</span>") + "</td>" +
-      "<td>" + (r.current_sellers != null ? r.current_sellers : "<span class='no-data'>-</span>") + "</td>" +
-      "<td>" + (r.amazon_selling ? "<span class='badge-amz'>AMZ</span>" : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.weight != null ? Number(r.weight).toFixed(2) + " lb" : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.cost != null ? "$" + Number(r.cost).toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
+      "<td style='" + (r.amazon_selling ? "background:rgba(243,156,18,0.25);font-weight:700;" : "") + "'>" + (r.current_sellers != null ? r.current_sellers : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + roiStr + "</td>" +
       "<td style='display:flex;gap:6px;'>" +
         "<button class='btn btn-primary btn-sm' onclick=\"openDetail('" + r.asin + "')\">View</button>" +
