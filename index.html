@@ -124,6 +124,7 @@
   <div class="nav-brand">&#9889; ASIN TRACKER</div>
   <button class="nav-btn active" onclick="showPage('dashboard')">Dashboard</button>
   <button class="nav-btn" onclick="showPage('velocity')">Velocity Filter</button>
+  <button class="nav-btn" onclick="showPage('bulk')">Bulk Import</button>
   <button class="nav-btn" onclick="showPage('settings')">Settings</button>
   <div class="nav-right">
     <span id="syncStatus">Not synced yet</span>
@@ -430,7 +431,58 @@
     </div>
   </div>
 </div>
+<!-- BULK IMPORT -->
+<div class="page" id="page-bulk">
+  <div class="panel">
+    <h3>Bulk Import Leads</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+      Paste your leads below — one per line. Each row should be:<br>
+      <strong style="color:var(--text);">ASIN, Cost Price, Supplier URL, Supplier Name</strong><br>
+      Cost price, supplier URL and supplier name are optional. ASIN is required.
+    </p>
+    <textarea id="bulkInput" placeholder="B000BPDGUU, 11.49, https://www.walmart.com/ip/example, Walmart
+B087QPPF3Z, 9.81, https://www.homedepot.com/p/example, Home Depot
+B07SCN6QVZ, 6.00" 
+      style="width:100%;height:160px;background:var(--bg);border:1px solid var(--border);
+             border-radius:6px;padding:12px;color:var(--text);font-size:13px;
+             font-family:'Segoe UI',sans-serif;resize:vertical;line-height:1.6;">
+    </textarea>
+    <div class="form-actions" style="margin-top:12px;">
+      <button class="btn btn-primary" onclick="parseBulkInput()">Preview Import</button>
+      <button class="btn btn-muted" onclick="clearBulkImport()">Clear</button>
+    </div>
+  </div>
 
+  <div id="bulkPreviewPanel" style="display:none;">
+    <div class="panel">
+      <h3>Preview</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+        Review your leads below. Remove any you don't want then click Import All.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ASIN</th>
+              <th>Cost</th>
+              <th>Supplier Name</th>
+              <th>Supplier URL</th>
+              <th>Status</th>
+              <th>Remove</th>
+            </tr>
+          </thead>
+          <tbody id="bulkPreviewBody"></tbody>
+        </table>
+      </div>
+      <div class="form-actions" style="margin-top:16px;">
+        <button class="btn btn-success" onclick="importAllBulk()">Import All</button>
+        <button class="btn btn-muted" onclick="clearBulkImport()">Cancel</button>
+      </div>
+      <div id="bulkProgress" style="display:none;margin-top:12px;font-size:13px;color:var(--muted);"></div>
+    </div>
+  </div>
+</div>
+  
 <!-- SETTINGS -->
 <div class="page" id="page-settings">
   <div class="panel">
@@ -1174,6 +1226,138 @@ function quickFilter(type) {
   // Switch to velocity page and run the filter
   showPage("velocity");
   runVelocityFilter();
+}
+
+let bulkLeads = [];
+
+function parseBulkInput() {
+  const raw = document.getElementById("bulkInput").value.trim();
+  if (!raw) { alert("Please paste some leads first."); return; }
+
+  const lines = raw.split("\n").map(function(l) { return l.trim(); }).filter(Boolean);
+  bulkLeads = [];
+
+  lines.forEach(function(line) {
+    // Support comma or tab separation
+    const parts = line.split(/,|\t/).map(function(p) { return p.trim(); });
+    const asin  = (parts[0] || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!asin || asin.length !== 10) return;
+
+    bulkLeads.push({
+      asin:          asin,
+      cost:          parts[1] ? parseFloat(parts[1]) || null : null,
+      url:           parts[2] || "",
+      supplier_name: parts[3] || "",
+      status:        "ready"
+    });
+  });
+
+  if (!bulkLeads.length) {
+    alert("No valid ASINs found. Make sure each ASIN is 10 characters.");
+    return;
+  }
+
+  renderBulkPreview();
+  document.getElementById("bulkPreviewPanel").style.display = "block";
+}
+
+function renderBulkPreview() {
+  const html = bulkLeads.map(function(r, i) {
+    const statusColor = r.status === "ready" ? "var(--muted)"
+      : r.status === "done"    ? "var(--green)"
+      : r.status === "exists"  ? "var(--orange)"
+      : "var(--red)";
+    const statusText = r.status === "ready"  ? "Ready"
+      : r.status === "done"   ? "Imported"
+      : r.status === "exists" ? "Already exists"
+      : "Error";
+    return "<tr id='bulk-row-" + i + "'>" +
+      "<td><span style='font-family:monospace;color:var(--accent);'>" + r.asin + "</span></td>" +
+      "<td>" + (r.cost != null ? "$" + r.cost.toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
+      "<td>" + (r.supplier_name || "<span class='no-data'>-</span>") + "</td>" +
+      "<td style='max-width:200px;overflow:hidden;text-overflow:ellipsis;'>" +
+        (r.url ? "<a href='" + r.url + "' target='_blank' class='source-link'>" + r.url + "</a>" : "<span class='no-data'>-</span>") +
+      "</td>" +
+      "<td style='color:" + statusColor + ";font-weight:600;'>" + statusText + "</td>" +
+      "<td><button class='btn btn-danger btn-sm' onclick='removeBulkRow(" + i + ")'>X</button></td>" +
+    "</tr>";
+  }).join("");
+  document.getElementById("bulkPreviewBody").innerHTML = html ||
+    "<tr><td colspan='6' class='status-msg'>No valid leads to import.</td></tr>";
+}
+
+function removeBulkRow(i) {
+  bulkLeads.splice(i, 1);
+  if (!bulkLeads.length) {
+    clearBulkImport();
+    return;
+  }
+  renderBulkPreview();
+}
+
+async function importAllBulk() {
+  const progress = document.getElementById("bulkProgress");
+  progress.style.display = "block";
+
+  let done = 0, skipped = 0, errors = 0;
+  const ready = bulkLeads.filter(function(r) { return r.status === "ready"; });
+
+  for (let i = 0; i < ready.length; i++) {
+    const lead = ready[i];
+    progress.textContent = "Importing " + (i + 1) + " of " + ready.length + "...";
+
+    try {
+      // Add ASIN
+      const res = await fetch(API + "/asins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ asin: lead.asin, cost: lead.cost })
+      });
+
+      if (res.status === 409) {
+        lead.status = "exists";
+        skipped++;
+      } else if (!res.ok) {
+        lead.status = "error";
+        errors++;
+      } else {
+        // Add source if URL provided
+        if (lead.url) {
+          await fetch(API + "/sources", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              asin:          lead.asin,
+              supplier_name: lead.supplier_name,
+              url:           lead.url,
+              cost:          lead.cost
+            })
+          });
+        }
+        lead.status = "done";
+        done++;
+      }
+    } catch(e) {
+      lead.status = "error";
+      errors++;
+    }
+
+    renderBulkPreview();
+  }
+
+  progress.textContent = "Done! " + done + " imported, " + skipped + " already existed, " + errors + " errors.";
+  progress.style.color = "var(--green)";
+
+  // Reload ASIN list and sources in background
+  await Promise.all([loadAsins(), loadAllSources()]);
+}
+
+function clearBulkImport() {
+  bulkLeads = [];
+  document.getElementById("bulkInput").value = "";
+  document.getElementById("bulkPreviewPanel").style.display = "none";
+  document.getElementById("bulkProgress").style.display = "none";
+  document.getElementById("bulkProgress").style.color = "var(--muted)";
 }
   
 loadAll();
