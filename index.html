@@ -128,7 +128,7 @@
   <button class="nav-btn" onclick="showPage('settings')">Settings</button>
   <div class="nav-right">
     <span id="syncStatus">Not synced yet</span>
-    <button class="btn btn-primary" onclick="backfillHistory()">&#128218; Back-fill</button>
+    <button class="btn btn-primary" onclick="()">&#128218; Back-fill</button>
     <button class="btn btn-success" onclick="syncKeepa()">&#128260; Sync Keepa</button>
   </div>
 </nav>
@@ -1396,7 +1396,11 @@ async function backfillHistory() {
   const status = document.getElementById("syncStatus");
   status.textContent = "Back-filling history...";
   try {
-    const res  = await fetch(API + "/backfill", { method: "POST" });
+    const res  = await fetch(API + "/backfill", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
     const data = await res.json();
     if (data.message) {
       status.textContent = data.message;
