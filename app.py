@@ -46,12 +46,12 @@ REFERRAL_FEES = {
 
 def get_referral_fee(category):
     if not category:
-        return 0.15  # default
+        return 0.15
     key = category.lower().strip()
     for k, v in REFERRAL_FEES.items():
         if k in key or key in k:
             return v
-    return 0.15  # default fallback
+    return 0.15
 
 
 # -------------------------------
@@ -78,7 +78,6 @@ def get_setting(key):
 # ROUTES - ASINS
 # -------------------------------
 
-# Get all ASINs
 @app.route("/asins", methods=["GET"])
 def get_asins():
     conn = get_db()
@@ -100,7 +99,6 @@ def get_asins():
     return jsonify(rows)
 
 
-# Add a new ASIN
 @app.route("/asins", methods=["POST"])
 def add_asin():
     try:
@@ -114,13 +112,11 @@ def add_asin():
         conn = get_db()
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        # Check if ASIN exists (active or soft-deleted)
         cur.execute("SELECT asin, is_active FROM asins WHERE asin = %s", (asin,))
         existing = cur.fetchone()
 
         if existing:
             if not existing["is_active"]:
-                # Reactivate soft-deleted ASIN
                 cur.execute("""
                     UPDATE asins SET is_active = TRUE, cost = %s, notes = %s
                     WHERE asin = %s
@@ -134,34 +130,29 @@ def add_asin():
                 conn.close()
                 return jsonify({"error": "ASIN already exists"}), 409
 
-        try:
-            cur.execute("""
-                INSERT INTO asins (asin, title, brand, category, weight, cost, notes)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING *
-            """, (
-                asin,
-                data.get("title", ""),
-                data.get("brand", ""),
-                data.get("category", ""),
-                data.get("weight"),
-                data.get("cost"),
-                data.get("notes", "")
-            ))
-            conn.commit()
-            row = cur.fetchone()
-            conn.close()
-            return jsonify(dict(row)), 201
-        except Exception as db_error:
-            conn.rollback()
-            conn.close()
-            logging.error(f"Database error: {str(db_error)}")
-            return jsonify({"error": str(db_error)}), 500
+        cur.execute("""
+            INSERT INTO asins (asin, title, brand, category, weight, cost, notes)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING *
+        """, (
+            asin,
+            data.get("title", ""),
+            data.get("brand", ""),
+            data.get("category", ""),
+            data.get("weight"),
+            data.get("cost"),
+            data.get("notes", "")
+        ))
+        conn.commit()
+        row = cur.fetchone()
+        conn.close()
+        return jsonify(dict(row)), 201
 
     except Exception as e:
-        logging.error(f"General error: {str(e)}")
+        logging.error(f"Add ASIN error: {str(e)}")
         return jsonify({"error": str(e)}), 500
-# Update an ASIN (cost, notes, fba_fee override etc)
+
+
 @app.route("/asins/<asin>", methods=["PATCH"])
 def update_asin(asin):
     try:
@@ -186,21 +177,14 @@ def update_asin(asin):
             values
         )
         conn.commit()
-            row = cur.fetchone()
-            conn.close()
-            return jsonify(dict(row)), 201
-        except Exception as db_error:
-            conn.rollback()
-            conn.close()
-            logging.error(f"Database error: {str(db_error)}")
-            return jsonify({"error": str(db_error)}), 500
+        conn.close()
+        return jsonify({"success": True})
 
     except Exception as e:
-        logging.error(f"General error: {str(e)}")
+        logging.error(f"Update error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 
-# Delete an ASIN (soft delete)
 @app.route("/asins/<asin>", methods=["DELETE"])
 def delete_asin(asin):
     conn = get_db()
@@ -233,7 +217,7 @@ def save_settings():
         cur = conn.cursor()
         for key, value in data.items():
             if key == "keepa_api_key":
-                continue  # never overwrite API key via this route
+                continue
             cur.execute("""
                 INSERT INTO settings (key, value)
                 VALUES (%s, %s)
@@ -302,7 +286,7 @@ def sync_keepa():
 
                 csv = product.get("csv") or []
 
-              # --- BUY BOX PRICE (csv index 18) ---
+                # --- BUY BOX PRICE (csv index 18) ---
                 buybox_price = None
                 if len(csv) > 18 and csv[18] and len(csv[18]) >= 2:
                     prices = [csv[18][i] for i in range(1, len(csv[18]), 2)
@@ -332,8 +316,7 @@ def sync_keepa():
                     if vals:
                         seller_count = vals[-1]
 
-                # --- AMAZON STOCK (csv index 11 is marketplace, 
-                #     Amazon stock from stats) ---
+                # --- STATS ---
                 stats = product.get("stats") or {}
                 stock = None
                 stock_val = stats.get("stockAmazon")
@@ -343,7 +326,7 @@ def sync_keepa():
                 # --- IS AMAZON SELLING ---
                 is_amazon = bool(stats.get("isAmazon", False))
 
-                # --- WEIGHT (grams → lbs) ---
+                # --- WEIGHT (grams to lbs) ---
                 weight_grams = product.get("packageWeight")
                 weight_lbs = None
                 if weight_grams and weight_grams > 0:
@@ -395,29 +378,25 @@ def sync_keepa():
                         f"UPDATE asins SET {', '.join(update_fields)} WHERE asin = %s",
                         update_vals
                     )
-                    
-               # --- CHECK IF ASIN HAS EXISTING HISTORY ---
+
+                # --- CHECK HISTORY COUNT ---
                 cur.execute("SELECT COUNT(*) FROM history WHERE asin = %s", (asin,))
                 history_count = cur.fetchone()[0]
 
                 if history_count < 30:
-                    # Not enough history — back-fill 180 days
-                    logging.debug(f"{asin}: Less than 30 days history found, back-filling 180 days")
+                    logging.debug(f"{asin}: Less than 30 days history, back-filling 180 days")
 
-                    # Build a lookup of date -> values from Keepa arrays
-                    # Keepa timestamps are minutes since 2011-01-01
                     KEEPA_EPOCH = datetime(2011, 1, 1)
                     cutoff = datetime.utcnow() - timedelta(days=180)
 
                     def extract_keepa_series(arr):
-                        """Extract [(datetime, value)] from Keepa price array - values in cents"""
                         series = []
                         if not arr or len(arr) < 2:
                             return series
-                        for i in range(0, len(arr) - 1, 2):
+                        for j in range(0, len(arr) - 1, 2):
                             try:
-                                ts  = arr[i]
-                                val = arr[i + 1]
+                                ts  = arr[j]
+                                val = arr[j + 1]
                                 if ts is None or val is None:
                                     continue
                                 dt = KEEPA_EPOCH + timedelta(minutes=int(ts))
@@ -432,14 +411,13 @@ def sync_keepa():
                         return series
 
                     def extract_keepa_int_series(arr):
-                        """Extract [(datetime, value)] from Keepa int array - rank/sellers"""
                         series = []
                         if not arr or len(arr) < 2:
                             return series
-                        for i in range(0, len(arr) - 1, 2):
+                        for j in range(0, len(arr) - 1, 2):
                             try:
-                                ts  = arr[i]
-                                val = arr[i + 1]
+                                ts  = arr[j]
+                                val = arr[j + 1]
                                 if ts is None or val is None:
                                     continue
                                 dt = KEEPA_EPOCH + timedelta(minutes=int(ts))
@@ -453,31 +431,11 @@ def sync_keepa():
                                 continue
                         return series
 
-                    def extract_keepa_int_series(arr):
-                        """Same but for rank/seller counts (no /100)"""
-                        series = []
-                        if not arr or len(arr) < 2:
-                            return series
-                        for i in range(0, len(arr) - 1, 2):
-                            ts  = arr[i]
-                            val = arr[i + 1]
-                            if ts is None or val is None:
-                                continue
-                            dt = KEEPA_EPOCH + timedelta(minutes=ts)
-                            if dt < cutoff:
-                                continue
-                            if val == -1:
-                                val = None
-                            series.append((dt, val))
-                        return series
-
                     bb_series     = extract_keepa_series(csv[18] if len(csv) > 18 and csv[18] else [])
                     new_series    = extract_keepa_series(csv[1]  if len(csv) > 1  and csv[1]  else [])
                     rank_series   = extract_keepa_int_series(csv[3]  if len(csv) > 3  and csv[3]  else [])
                     seller_series = extract_keepa_int_series(csv[11] if len(csv) > 11 and csv[11] else [])
 
-                    # Build daily snapshots by date
-                    from collections import defaultdict
                     daily = defaultdict(lambda: {
                         "buybox_price": None,
                         "new_price": None,
@@ -505,7 +463,6 @@ def sync_keepa():
                         if daily[day]["seller_count"] is None:
                             daily[day]["seller_count"] = val
 
-                    # Insert all days in one bulk operation
                     if daily:
                         bulk_rows = []
                         for day, vals in sorted(daily.items()):
@@ -530,10 +487,7 @@ def sync_keepa():
 
                         logging.debug(f"{asin}: Back-filled {len(bulk_rows)} days of history")
 
-                    logging.debug(f"{asin}: Back-filled {len(daily)} days of history")
-
                 else:
-                    # Existing ASIN — just insert today's snapshot
                     cur.execute("""
                         INSERT INTO history
                             (asin, buybox_price, new_price, rank, seller_count, stock, is_amazon_selling)
@@ -559,6 +513,7 @@ def sync_keepa():
 # -------------------------------
 # ROUTES - HISTORY & DELTAS
 # -------------------------------
+
 @app.route("/deltas", methods=["GET"])
 def get_all_deltas():
     try:
@@ -566,7 +521,6 @@ def get_all_deltas():
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         now = datetime.utcnow()
 
-        # Get all active ASINs
         cur.execute("SELECT asin FROM asins WHERE is_active = TRUE")
         asins = [row["asin"] for row in cur.fetchall()]
 
@@ -577,10 +531,10 @@ def get_all_deltas():
         def get_snapshots(days_back):
             cutoff = now - timedelta(days=days_back)
             cur.execute("""
-                SELECT DISTINCT ON (asin) 
+                SELECT DISTINCT ON (asin)
                     asin, buybox_price, new_price, rank, seller_count
                 FROM history
-                WHERE asin = ANY(%s) 
+                WHERE asin = ANY(%s)
                 AND captured_at <= %s
                 ORDER BY asin, captured_at DESC
             """, (asins, cutoff))
@@ -603,7 +557,7 @@ def get_all_deltas():
 
         result = {}
         for asin in asins:
-            c = current.get(asin)
+            c    = current.get(asin)
             p30  = past_30.get(asin)
             p90  = past_90.get(asin)
             p180 = past_180.get(asin)
@@ -629,7 +583,8 @@ def get_all_deltas():
     except Exception as e:
         logging.error(f"Bulk deltas error: {str(e)}")
         return jsonify({"error": str(e)}), 500
-        
+
+
 @app.route("/history/<asin>", methods=["GET"])
 def get_history(asin):
     days = request.args.get("days", 90, type=int)
@@ -646,12 +601,12 @@ def get_history(asin):
     conn.close()
     return jsonify(rows)
 
+
 @app.route("/deltas/<asin>", methods=["GET"])
 def get_deltas(asin):
     asin = asin.upper()
     conn = get_db()
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
     now = datetime.utcnow()
 
     def get_closest(days_back):
@@ -681,25 +636,46 @@ def get_deltas(asin):
 
     result = {
         "asin": asin,
-        "price_delta_30":       delta(current, past_30,  "buybox_price"),
-        "price_delta_90":       delta(current, past_90,  "buybox_price"),
-        "price_delta_180":      delta(current, past_180, "buybox_price"),
-        "new_price_delta_30":   delta(current, past_30,  "new_price"),
-        "new_price_delta_90":   delta(current, past_90,  "new_price"),
-        "new_price_delta_180":  delta(current, past_180, "new_price"),
-        "rank_delta_30":        delta(current, past_30,  "rank"),
-        "rank_delta_90":        delta(current, past_90,  "rank"),
-        "rank_delta_180":       delta(current, past_180, "rank"),
-        "seller_delta_30":      delta(current, past_30,  "seller_count"),
-        "seller_delta_90":      delta(current, past_90,  "seller_count"),
-        "seller_delta_180":     delta(current, past_180, "seller_count"),
+        "price_delta_30":      delta(current, past_30,  "buybox_price"),
+        "price_delta_90":      delta(current, past_90,  "buybox_price"),
+        "price_delta_180":     delta(current, past_180, "buybox_price"),
+        "new_price_delta_30":  delta(current, past_30,  "new_price"),
+        "new_price_delta_90":  delta(current, past_90,  "new_price"),
+        "new_price_delta_180": delta(current, past_180, "new_price"),
+        "rank_delta_30":       delta(current, past_30,  "rank"),
+        "rank_delta_90":       delta(current, past_90,  "rank"),
+        "rank_delta_180":      delta(current, past_180, "rank"),
+        "seller_delta_30":     delta(current, past_30,  "seller_count"),
+        "seller_delta_90":     delta(current, past_90,  "seller_count"),
+        "seller_delta_180":    delta(current, past_180, "seller_count"),
     }
 
     conn.close()
     return jsonify(result)
+
+
 # -------------------------------
 # ROUTES - SOURCES
 # -------------------------------
+
+@app.route("/sources", methods=["GET"])
+def get_all_sources():
+    try:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute("""
+            SELECT s.* FROM sources s
+            JOIN asins a ON s.asin = a.asin
+            WHERE a.is_active = TRUE
+            ORDER BY s.supplier_name ASC
+        """)
+        rows = cur.fetchall()
+        conn.close()
+        return jsonify(rows)
+    except Exception as e:
+        logging.error(f"Get all sources error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/sources/<asin>", methods=["GET"])
 def get_sources(asin):
@@ -707,8 +683,8 @@ def get_sources(asin):
         conn = get_db()
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute("""
-            SELECT * FROM sources 
-            WHERE asin = %s 
+            SELECT * FROM sources
+            WHERE asin = %s
             ORDER BY created_at ASC
         """, (asin.upper(),))
         rows = cur.fetchall()
@@ -795,23 +771,6 @@ def update_source(source_id):
         logging.error(f"Update source error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@app.route("/sources", methods=["GET"])
-def get_all_sources():
-    try:
-        conn = get_db()
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("""
-            SELECT s.* FROM sources s
-            JOIN asins a ON s.asin = a.asin
-            WHERE a.is_active = TRUE
-            ORDER BY s.supplier_name ASC
-        """)
-        rows = cur.fetchall()
-        conn.close()
-        return jsonify(rows)
-    except Exception as e:
-        logging.error(f"Get all sources error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
 
 # -------------------------------
 # SERVE FRONTEND
