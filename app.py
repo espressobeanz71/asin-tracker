@@ -522,7 +522,7 @@ def backfill_history():
         cur.execute("""
             SELECT a.asin FROM asins a
             WHERE a.is_active = TRUE
-            AND (SELECT COUNT(*) FROM history h WHERE h.asin = a.asin) = 0
+            AND (SELECT COUNT(*) FROM history h WHERE h.asin = a.asin) < 30
         """)
 
     asins = [row["asin"] for row in cur.fetchall()]
