@@ -504,7 +504,10 @@ def backfill_history():
     if not api_key:
         return jsonify({"error": "Keepa API key not configured"}), 500
 
-    data = request.json or {}
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+    except Exception:
+        data = {}
     specific_asin = data.get("asin")
 
     conn = get_db()
