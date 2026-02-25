@@ -75,6 +75,101 @@ def get_setting(key):
 
 
 # -------------------------------
+# KEEPA HISTORY HELPERS
+# -------------------------------
+
+def extract_price_series(arr, cutoff):
+    KEEPA_EPOCH = datetime(2011, 1, 1)
+    series = []
+    if not arr or len(arr) < 2:
+        return series
+    for j in range(0, len(arr) - 1, 2):
+        try:
+            ts  = arr[j]
+            val = arr[j + 1]
+            if ts is None or val is None:
+                continue
+            dt = KEEPA_EPOCH + timedelta(minutes=int(ts))
+            if dt < cutoff:
+                continue
+            if val in (-1, 0) or val > 1000000:
+                series.append((dt, None))
+            else:
+                series.append((dt, round(val / 100, 2)))
+        except Exception:
+            continue
+    return series
+
+def extract_int_series(arr, cutoff):
+    KEEPA_EPOCH = datetime(2011, 1, 1)
+    series = []
+    if not arr or len(arr) < 2:
+        return series
+    for j in range(0, len(arr) - 1, 2):
+        try:
+            ts  = arr[j]
+            val = arr[j + 1]
+            if ts is None or val is None:
+                continue
+            dt = KEEPA_EPOCH + timedelta(minutes=int(ts))
+            if dt < cutoff:
+                continue
+            if val == -1:
+                series.append((dt, None))
+            else:
+                series.append((dt, int(val)))
+        except Exception:
+            continue
+    return series
+
+def build_daily_history(csv, cutoff, is_amazon):
+    bb_series     = extract_price_series(csv[18] if len(csv) > 18 and csv[18] else [], cutoff)
+    new_series    = extract_price_series(csv[1]  if len(csv) > 1  and csv[1]  else [], cutoff)
+    rank_series   = extract_int_series(csv[3]  if len(csv) > 3  and csv[3]  else [], cutoff)
+    seller_series = extract_int_series(csv[11] if len(csv) > 11 and csv[11] else [], cutoff)
+
+    daily = defaultdict(lambda: {
+        "buybox_price": None, "new_price": None,
+        "rank": None, "seller_count": None
+    })
+
+    for dt, val in bb_series:
+        day = dt.date()
+        if daily[day]["buybox_price"] is None:
+            daily[day]["buybox_price"] = val
+
+    for dt, val in new_series:
+        day = dt.date()
+        if daily[day]["new_price"] is None:
+            daily[day]["new_price"] = val
+
+    for dt, val in rank_series:
+        day = dt.date()
+        if daily[day]["rank"] is None:
+            daily[day]["rank"] = val
+
+    for dt, val in seller_series:
+        day = dt.date()
+        if daily[day]["seller_count"] is None:
+            daily[day]["seller_count"] = val
+
+    bulk_rows = []
+    for day, vals in sorted(daily.items()):
+        snap_dt = datetime.combine(day, datetime.min.time())
+        bulk_rows.append((
+            None,  # asin placeholder — set by caller
+            snap_dt,
+            vals["buybox_price"],
+            vals["new_price"],
+            vals["rank"],
+            vals["seller_count"],
+            None,
+            is_amazon
+        ))
+    return bulk_rows
+
+
+# -------------------------------
 # ROUTES - ASINS
 # -------------------------------
 
@@ -232,7 +327,7 @@ def save_settings():
 
 
 # -------------------------------
-# ROUTES - KEEPA SYNC
+# ROUTES - KEEPA SYNC (fast - today's snapshot only)
 # -------------------------------
 
 @app.route("/sync", methods=["POST"])
@@ -294,7 +389,7 @@ def sync_keepa():
                     if prices:
                         buybox_price = prices[-1] / 100
 
-                # --- NEW PRICE / LOWEST NEW (csv index 1) ---
+                # --- NEW PRICE (csv index 1) ---
                 new_price = None
                 if len(csv) > 1 and csv[1] and len(csv[1]) >= 2:
                     prices = [csv[1][i] for i in range(1, len(csv[1]), 2)
@@ -323,10 +418,9 @@ def sync_keepa():
                 if stock_val is not None and stock_val != -1:
                     stock = stock_val
 
-                # --- IS AMAZON SELLING ---
                 is_amazon = bool(stats.get("isAmazon", False))
 
-                # --- WEIGHT (grams to lbs) ---
+                # --- WEIGHT ---
                 weight_grams = product.get("packageWeight")
                 weight_lbs = None
                 if weight_grams and weight_grams > 0:
@@ -338,10 +432,8 @@ def sync_keepa():
                 if root_cat:
                     category = str(root_cat)
 
-                # --- TITLE ---
+                # --- TITLE & BRAND ---
                 title = product.get("title", "")
-
-                # --- BRAND ---
                 brand = product.get("brand", "")
 
                 # --- IMAGE ---
@@ -379,120 +471,12 @@ def sync_keepa():
                         update_vals
                     )
 
-                # --- CHECK HISTORY COUNT ---
-                cur.execute("SELECT COUNT(*) FROM history WHERE asin = %s", (asin,))
-                history_count = cur.fetchone()[0]
-
-                if history_count == 0:
-                    logging.debug(f"{asin}: Less than 30 days history, back-filling 180 days")
-
-                    KEEPA_EPOCH = datetime(2011, 1, 1)
-                    cutoff = datetime.utcnow() - timedelta(days=180)
-
-                    def extract_keepa_series(arr):
-                        series = []
-                        if not arr or len(arr) < 2:
-                            return series
-                        for j in range(0, len(arr) - 1, 2):
-                            try:
-                                ts  = arr[j]
-                                val = arr[j + 1]
-                                if ts is None or val is None:
-                                    continue
-                                dt = KEEPA_EPOCH + timedelta(minutes=int(ts))
-                                if dt < cutoff:
-                                    continue
-                                if val in (-1, 0) or val > 1000000:
-                                    series.append((dt, None))
-                                else:
-                                    series.append((dt, round(val / 100, 2)))
-                            except Exception:
-                                continue
-                        return series
-
-                    def extract_keepa_int_series(arr):
-                        series = []
-                        if not arr or len(arr) < 2:
-                            return series
-                        for j in range(0, len(arr) - 1, 2):
-                            try:
-                                ts  = arr[j]
-                                val = arr[j + 1]
-                                if ts is None or val is None:
-                                    continue
-                                dt = KEEPA_EPOCH + timedelta(minutes=int(ts))
-                                if dt < cutoff:
-                                    continue
-                                if val == -1:
-                                    series.append((dt, None))
-                                else:
-                                    series.append((dt, int(val)))
-                            except Exception:
-                                continue
-                        return series
-
-                    bb_series     = extract_keepa_series(csv[18] if len(csv) > 18 and csv[18] else [])
-                    new_series    = extract_keepa_series(csv[1]  if len(csv) > 1  and csv[1]  else [])
-                    rank_series   = extract_keepa_int_series(csv[3]  if len(csv) > 3  and csv[3]  else [])
-                    seller_series = extract_keepa_int_series(csv[11] if len(csv) > 11 and csv[11] else [])
-
-                    daily = defaultdict(lambda: {
-                        "buybox_price": None,
-                        "new_price": None,
-                        "rank": None,
-                        "seller_count": None
-                    })
-
-                    for dt, val in bb_series:
-                        day = dt.date()
-                        if daily[day]["buybox_price"] is None:
-                            daily[day]["buybox_price"] = val
-
-                    for dt, val in new_series:
-                        day = dt.date()
-                        if daily[day]["new_price"] is None:
-                            daily[day]["new_price"] = val
-
-                    for dt, val in rank_series:
-                        day = dt.date()
-                        if daily[day]["rank"] is None:
-                            daily[day]["rank"] = val
-
-                    for dt, val in seller_series:
-                        day = dt.date()
-                        if daily[day]["seller_count"] is None:
-                            daily[day]["seller_count"] = val
-
-                    if daily:
-                        bulk_rows = []
-                        for day, vals in sorted(daily.items()):
-                            snap_dt = datetime.combine(day, datetime.min.time())
-                            bulk_rows.append((
-                                asin,
-                                snap_dt,
-                                vals["buybox_price"],
-                                vals["new_price"],
-                                vals["rank"],
-                                vals["seller_count"],
-                                None,
-                                is_amazon
-                            ))
-
-                        psycopg2.extras.execute_values(cur, """
-                            INSERT INTO history
-                                (asin, captured_at, buybox_price, new_price, rank, seller_count, stock, is_amazon_selling)
-                            VALUES %s
-                            ON CONFLICT DO NOTHING
-                        """, bulk_rows)
-
-                        logging.debug(f"{asin}: Back-filled {len(bulk_rows)} days of history")
-
-                else:
-                    cur.execute("""
-                        INSERT INTO history
-                            (asin, buybox_price, new_price, rank, seller_count, stock, is_amazon_selling)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """, (asin, buybox_price, new_price, rank, seller_count, stock, is_amazon))
+                # --- INSERT TODAY'S SNAPSHOT ONLY ---
+                cur.execute("""
+                    INSERT INTO history
+                        (asin, buybox_price, new_price, rank, seller_count, stock, is_amazon_selling)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (asin, buybox_price, new_price, rank, seller_count, stock, is_amazon))
 
                 updated += 1
 
@@ -508,6 +492,102 @@ def sync_keepa():
         "updated": updated,
         "errors": errors
     })
+
+
+# -------------------------------
+# ROUTES - BACK-FILL HISTORY
+# -------------------------------
+
+@app.route("/backfill", methods=["POST"])
+def backfill_history():
+    api_key = get_setting("keepa_api_key")
+    if not api_key:
+        return jsonify({"error": "Keepa API key not configured"}), 500
+
+    data = request.json or {}
+    specific_asin = data.get("asin")
+
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+    if specific_asin:
+        cur.execute(
+            "SELECT asin FROM asins WHERE is_active = TRUE AND asin = %s",
+            (specific_asin.upper(),)
+        )
+    else:
+        cur.execute("""
+            SELECT a.asin FROM asins a
+            WHERE a.is_active = TRUE
+            AND (SELECT COUNT(*) FROM history h WHERE h.asin = a.asin) = 0
+        """)
+
+    asins = [row["asin"] for row in cur.fetchall()]
+    conn.close()
+
+    if not asins:
+        return jsonify({"message": "No ASINs need back-filling", "filled": 0})
+
+    filled = 0
+    errors = []
+    cutoff = datetime.utcnow() - timedelta(days=180)
+    batch_size = 5
+
+    for i in range(0, len(asins), batch_size):
+        batch = asins[i:i+batch_size]
+        url = (
+            f"https://api.keepa.com/product"
+            f"?key={api_key}"
+            f"&domain=1"
+            f"&asin={','.join(batch)}"
+            f"&stats=1"
+            f"&history=1"
+        )
+
+        try:
+            response = requests.get(url, timeout=60)
+            data = response.json()
+
+            if "products" not in data:
+                errors.append(f"No products for batch {batch}")
+                continue
+
+            conn = get_db()
+            cur = conn.cursor()
+
+            for product in data["products"]:
+                asin = product.get("asin")
+                if not asin:
+                    continue
+
+                csv = product.get("csv") or []
+                stats = product.get("stats") or {}
+                is_amazon = bool(stats.get("isAmazon", False))
+
+                bulk_rows = build_daily_history(csv, cutoff, is_amazon)
+
+                if bulk_rows:
+                    # Set the asin on each row
+                    bulk_rows = [(asin,) + row[1:] for row in bulk_rows]
+
+                    psycopg2.extras.execute_values(cur, """
+                        INSERT INTO history
+                            (asin, captured_at, buybox_price, new_price, rank, seller_count, stock, is_amazon_selling)
+                        VALUES %s
+                        ON CONFLICT DO NOTHING
+                    """, bulk_rows)
+
+                    logging.debug(f"{asin}: Back-filled {len(bulk_rows)} days")
+                    filled += 1
+
+            conn.commit()
+            conn.close()
+
+        except Exception as e:
+            errors.append(f"Batch error: {str(e)}")
+            logging.error(f"Backfill error: {str(e)}")
+
+    return jsonify({"success": True, "filled": filled, "errors": errors})
 
 
 # -------------------------------
