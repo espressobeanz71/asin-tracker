@@ -128,7 +128,7 @@
   <button class="nav-btn" onclick="showPage('settings')">Settings</button>
   <div class="nav-right">
     <span id="syncStatus">Not synced yet</span>
-    <button class="btn btn-primary" onclick="()">&#128218; Back-fill</button>
+    <button class="btn btn-primary" onclick="backfillHistory()">&#128218; Back-fill</button>
     <button class="btn btn-success" onclick="syncKeepa()">&#128260; Sync Keepa</button>
   </div>
 </nav>
@@ -573,10 +573,10 @@ function calcROI(asin) {
 }
 
 function showPage(name) {
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
+  document.querySelectorAll(".nav-btn").forEach(function(b) { b.classList.remove("active"); });
   document.getElementById("page-" + name).classList.add("active");
-  document.querySelectorAll(".nav-btn").forEach(b => {
+  document.querySelectorAll(".nav-btn").forEach(function(b) {
     if (b.textContent.toLowerCase().includes(name.substring(0,4)))
       b.classList.add("active");
   });
@@ -634,7 +634,8 @@ async function loadAllSources() {
       allSources[s.asin].push(s);
     });
     // Populate supplier dropdown and autocomplete list
-    const suppliers = [...new Set(data.map(function(s) { return s.supplier_name; }).filter(Boolean))].sort();
+    const supplierNames = data.map(function(s) { return s.supplier_name; }).filter(Boolean);
+    const suppliers = supplierNames.filter(function(v, i) { return supplierNames.indexOf(v) === i; }).sort();
     knownSuppliers = suppliers;
     const select = document.getElementById("f_supplier");
     select.innerHTML = "<option value=''>Any</option>";
@@ -674,13 +675,13 @@ function pickSupplier(name) {
 function updateStats() {
   document.getElementById("statTotal").textContent = allAsins.length;
   document.getElementById("statAmazon").textContent =
-    allAsins.filter(a => a.amazon_selling).length;
+    allAsins.filter(function(a) { return a.amazon_selling; }).length;
   document.getElementById("statPriceUp").textContent =
-    allAsins.filter(a => allDeltas[a.asin] && allDeltas[a.asin].price_delta_30 > 0).length;
+    allAsins.filter(function(a) { return allDeltas[a.asin] && allDeltas[a.asin].price_delta_30 > 0; }).length;
   document.getElementById("statSellersDown").textContent =
-    allAsins.filter(a => allDeltas[a.asin] && allDeltas[a.asin].seller_delta_30 < 0).length;
+    allAsins.filter(function(a) { return allDeltas[a.asin] && allDeltas[a.asin].seller_delta_30 < 0; }).length;
   document.getElementById("statRoiPos").textContent =
-    allAsins.filter(a => { const r = calcROI(a); return r && r.roi > 0; }).length;
+    allAsins.filter(function(a) { const r = calcROI(a); return r && r.roi > 0; }).length;
 }
 
 function dashSort(key) {
@@ -697,15 +698,15 @@ function getPrice(r) {
 
 function renderDashboard() {
   const search = (document.getElementById("dashSearch").value || "").toLowerCase();
-  let rows = allAsins.map(a => Object.assign({}, a, { roi: calcROI(a) ? calcROI(a).roi : null }));
+  let rows = allAsins.map(function(a) { return Object.assign({}, a, { roi: calcROI(a) ? calcROI(a).roi : null }); });
   if (search) {
-    rows = rows.filter(r =>
-      r.asin.toLowerCase().includes(search) ||
-      (r.title || "").toLowerCase().includes(search)
-    );
+    rows = rows.filter(function(r) {
+      return r.asin.toLowerCase().includes(search) ||
+        (r.title || "").toLowerCase().includes(search);
+    });
   }
   if (dashSortKey) {
-    rows.sort((a, b) => {
+    rows.sort(function(a, b) {
       const av = a[dashSortKey] != null ? a[dashSortKey] : -Infinity;
       const bv = b[dashSortKey] != null ? b[dashSortKey] : -Infinity;
       return typeof av === "string" ? av.localeCompare(bv) * dashSortDir : (av - bv) * dashSortDir;
