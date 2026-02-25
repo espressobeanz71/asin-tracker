@@ -383,7 +383,7 @@ def sync_keepa():
                 cur.execute("SELECT COUNT(*) FROM history WHERE asin = %s", (asin,))
                 history_count = cur.fetchone()[0]
 
-                if history_count < 30:
+                if history_count == 0:
                     logging.debug(f"{asin}: Less than 30 days history, back-filling 180 days")
 
                     KEEPA_EPOCH = datetime(2011, 1, 1)
