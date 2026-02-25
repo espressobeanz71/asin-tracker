@@ -115,6 +115,26 @@ def add_asin():
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
         try:
+            # Check if ASIN exists but is soft-deleted
+            cur.execute("SELECT asin, is_active FROM asins WHERE asin = %s", (asin,))
+            existing = cur.fetchone()
+
+            if existing:
+                if not existing["is_active"]:
+                    # Reactivate it
+                    cur.execute("""
+                        UPDATE asins SET is_active = TRUE, cost = %s, notes = %s
+                        WHERE asin = %s
+                    """, (data.get("cost"), data.get("notes", ""), asin))
+                    conn.commit()
+                    cur.execute("SELECT * FROM asins WHERE asin = %s", (asin,))
+                    row = cur.fetchone()
+                    conn.close()
+                    return jsonify(dict(row)), 201
+                else:
+                    conn.close()
+                    return jsonify({"error": "ASIN already exists"}), 409
+
             cur.execute("""
                 INSERT INTO asins (asin, title, brand, category, weight, cost, notes)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -137,11 +157,6 @@ def add_asin():
             conn.close()
             logging.error(f"Database error: {str(db_error)}")
             return jsonify({"error": str(db_error)}), 500
-
-    except Exception as e:
-        logging.error(f"General error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
 
 # Update an ASIN (cost, notes, fba_fee override etc)
 @app.route("/asins/<asin>", methods=["PATCH"])
