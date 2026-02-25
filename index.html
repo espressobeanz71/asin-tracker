@@ -128,6 +128,7 @@
   <button class="nav-btn" onclick="showPage('settings')">Settings</button>
   <div class="nav-right">
     <span id="syncStatus">Not synced yet</span>
+    <button class="btn btn-primary" onclick="backfillHistory()">&#128218; Back-fill</button>
     <button class="btn btn-success" onclick="syncKeepa()">&#128260; Sync Keepa</button>
   </div>
 </nav>
@@ -1389,6 +1390,24 @@ function clearBulkImport() {
   document.getElementById("bulkPreviewPanel").style.display = "none";
   document.getElementById("bulkProgress").style.display = "none";
   document.getElementById("bulkProgress").style.color = "var(--muted)";
+}
+
+async function backfillHistory() {
+  const status = document.getElementById("syncStatus");
+  status.textContent = "Back-filling history...";
+  try {
+    const res  = await fetch(API + "/backfill", { method: "POST" });
+    const data = await res.json();
+    if (data.message) {
+      status.textContent = data.message;
+    } else {
+      status.textContent = "Back-fill done: " + data.filled + " ASINs filled";
+    }
+    await loadAsins();
+  } catch(e) {
+    status.textContent = "Back-fill failed";
+    alert("Back-fill error: " + e.message);
+  }
 }
   
 loadAll();
