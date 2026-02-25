@@ -183,10 +183,17 @@ def update_asin(asin):
             values
         )
         conn.commit()
-        conn.close()
-        return jsonify({"success": True})
+            row = cur.fetchone()
+            conn.close()
+            return jsonify(dict(row)), 201
+        except Exception as db_error:
+            conn.rollback()
+            conn.close()
+            logging.error(f"Database error: {str(db_error)}")
+            return jsonify({"error": str(db_error)}), 500
+
     except Exception as e:
-        logging.error(f"Update error: {str(e)}")
+        logging.error(f"General error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 
