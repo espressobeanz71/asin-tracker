@@ -1263,14 +1263,16 @@ function parseBulkInput() {
 
 function renderBulkPreview() {
   const html = bulkLeads.map(function(r, i) {
-    const statusColor = r.status === "ready" ? "var(--muted)"
+    const statusColor = r.status === "ready"    ? "var(--muted)"
       : r.status === "done"    ? "var(--green)"
       : r.status === "exists"  ? "var(--orange)"
+      : r.status === "warning" ? "var(--orange)"
       : "var(--red)";
-    const statusText = r.status === "ready"  ? "Ready"
-      : r.status === "done"   ? "Imported"
-      : r.status === "exists" ? "Already exists"
-      : "Error";
+    const statusText = r.status === "ready"    ? "Ready"
+      : r.status === "done"    ? "Imported"
+      : r.status === "exists"  ? "Already exists"
+      : r.status === "warning" ? (r.errorMsg || "Warning")
+      : (r.errorMsg || "Error");
     return "<tr id='bulk-row-" + i + "'>" +
       "<td><span style='font-family:monospace;color:var(--accent);'>" + r.asin + "</span></td>" +
       "<td>" + (r.cost != null ? "$" + r.cost.toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
@@ -1278,14 +1280,13 @@ function renderBulkPreview() {
       "<td style='max-width:200px;overflow:hidden;text-overflow:ellipsis;'>" +
         (r.url ? "<a href='" + r.url + "' target='_blank' class='source-link'>" + r.url + "</a>" : "<span class='no-data'>-</span>") +
       "</td>" +
-      "<td style='color:" + statusColor + ";font-weight:600;'>" + statusText + "</td>" +
+      "<td style='color:" + statusColor + ";font-weight:600;max-width:220px;white-space:normal;font-size:12px;'>" + statusText + "</td>" +
       "<td><button class='btn btn-danger btn-sm' onclick='removeBulkRow(" + i + ")'>X</button></td>" +
     "</tr>";
   }).join("");
   document.getElementById("bulkPreviewBody").innerHTML = html ||
     "<tr><td colspan='6' class='status-msg'>No valid leads to import.</td></tr>";
 }
-
 function removeBulkRow(i) {
   bulkLeads.splice(i, 1);
   if (!bulkLeads.length) {
@@ -1298,6 +1299,7 @@ function removeBulkRow(i) {
 async function importAllBulk() {
   const progress = document.getElementById("bulkProgress");
   progress.style.display = "block";
+  progress.style.color = "var(--muted)";
 
   let done = 0, skipped = 0, errors = 0;
   const ready = bulkLeads.filter(function(r) { return r.status === "ready"; });
@@ -1307,6 +1309,15 @@ async function importAllBulk() {
     progress.textContent = "Importing " + (i + 1) + " of " + ready.length + "...";
 
     try {
+      // Validate ASIN format before even trying
+      if (!lead.asin || lead.asin.length !== 10 || !/^[A-Z0-9]{10}$/.test(lead.asin)) {
+        lead.status = "error";
+        lead.errorMsg = "Invalid ASIN format — must be 10 alphanumeric characters";
+        errors++;
+        renderBulkPreview();
+        continue;
+      }
+
       // Add ASIN
       const res = await fetch(API + "/asins", {
         method: "POST",
@@ -1316,14 +1327,21 @@ async function importAllBulk() {
 
       if (res.status === 409) {
         lead.status = "exists";
+        lead.errorMsg = null;
         skipped++;
       } else if (!res.ok) {
+        let msg = "Server error " + res.status;
+        try {
+          const errData = await res.json();
+          if (errData.error) msg = errData.error;
+        } catch(e) {}
         lead.status = "error";
+        lead.errorMsg = msg;
         errors++;
       } else {
         // Add source if URL provided
         if (lead.url) {
-          await fetch(API + "/sources", {
+          const srcRes = await fetch(API + "/sources", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1333,12 +1351,28 @@ async function importAllBulk() {
               cost:          lead.cost
             })
           });
+          if (!srcRes.ok) {
+            let srcMsg = "ASIN imported but source failed to save";
+            try {
+              const srcErr = await srcRes.json();
+              if (srcErr.error) srcMsg = "ASIN imported but source error: " + srcErr.error;
+            } catch(e) {}
+            lead.status = "warning";
+            lead.errorMsg = srcMsg;
+          } else {
+            lead.status = "done";
+            lead.errorMsg = null;
+            done++;
+          }
+        } else {
+          lead.status = "done";
+          lead.errorMsg = null;
+          done++;
         }
-        lead.status = "done";
-        done++;
       }
     } catch(e) {
       lead.status = "error";
+      lead.errorMsg = "Network error: " + e.message;
       errors++;
     }
 
@@ -1346,12 +1380,9 @@ async function importAllBulk() {
   }
 
   progress.textContent = "Done! " + done + " imported, " + skipped + " already existed, " + errors + " errors.";
-  progress.style.color = "var(--green)";
-
-  // Reload ASIN list and sources in background
+  progress.style.color = errors > 0 ? "var(--orange)" : "var(--green)";
   await Promise.all([loadAsins(), loadAllSources()]);
 }
-
 function clearBulkImport() {
   bulkLeads = [];
   document.getElementById("bulkInput").value = "";
