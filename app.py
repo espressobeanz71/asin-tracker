@@ -258,7 +258,7 @@ def update_asin(asin):
         fields = []
         values = []
 
-        for field in ["title", "cost", "weight", "notes", "fba_fee", "referral_fee_override"]:
+        for field in ["title", "cost", "weight", "notes", "fba_fee", "referral_fee_override", "gating_status"]:
             if field in data:
                 fields.append(f"{field} = %s")
                 values.append(data[field])
