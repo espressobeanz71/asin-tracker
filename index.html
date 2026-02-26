@@ -116,6 +116,16 @@
     .autocomplete-item:hover { background: var(--border); }
     .clickable-stat { cursor: pointer; transition: border-color 0.2s, transform 0.1s; }
     .clickable-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .gate-unknown  { background: #2a2a3a; color: #888; }
+    .gate-approved { background: rgba(46,204,113,0.2); color: #2ecc71; }
+    .gate-gated    { background: rgba(231,76,60,0.2); color: #e74c3c; }
+    .gate-pending  { background: rgba(243,156,18,0.2); color: #f39c12; }
+    .gate-btn { border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .gate-unknown  { background: #2a2a3a; color: #888; }
+    .gate-approved { background: rgba(46,204,113,0.2); color: #2ecc71; }
+    .gate-gated    { background: rgba(231,76,60,0.2); color: #e74c3c; }
+    .gate-pending  { background: rgba(243,156,18,0.2); color: #f39c12; }
+    .gate-btn { border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -219,11 +229,12 @@
           <th onclick="dashSort('weight')">Weight</th>
           <th onclick="dashSort('cost')">Cost</th>
           <th onclick="dashSort('roi')">ROI</th>
+          <th onclick="dashSort('gating_status')">Gating</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody id="dashBody">
-        <tr><td colspan="10" class="status-msg">Loading...</td></tr>
+        <tr><td colspan="11" class="status-msg">Loading...</td></tr>
       </tbody>
     </table>
   </div>
@@ -234,6 +245,16 @@
   <div class="panel">
     <h3>Filter Builder - combine any rules</h3>
     <div class="filter-builder">
+      <div class="filter-row">
+        <label>Gating</label>
+        <select id="f_gating">
+          <option value="">Any</option>
+          <option value="approved">Approved</option>
+          <option value="gated">Gated</option>
+          <option value="pending">Pending</option>
+          <option value="unknown">Unknown</option>
+        </select>
+      </div>
       <div class="filter-row">
         <label>Price</label>
         <select id="f_price_bb_dir">
@@ -714,7 +735,7 @@ function renderDashboard() {
   }
   if (!rows.length) {
     document.getElementById("dashBody").innerHTML =
-      "<tr><td colspan='10' class='status-msg'>No ASINs found.</td></tr>";
+      "<tr><td colspan='11' class='status-msg'>No ASINs found.</td></tr>"
     return;
   }
   const html = rows.map(function(r) {
@@ -733,6 +754,7 @@ function renderDashboard() {
       "<td>" + (r.weight != null ? Number(r.weight).toFixed(2) + " lb" : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.cost != null ? "$" + Number(r.cost).toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + roiStr + "</td>" +
+      "<td>" + gatingBadge(r.asin, r.gating_status) + "</td>" +
       "<td style='display:flex;gap:6px;'>" +
         "<button class='btn btn-primary btn-sm' onclick=\"openDetail('" + r.asin + "')\">View</button>" +
         "<button class='btn btn-danger btn-sm' onclick=\"deleteAsin('" + r.asin + "')\">X</button>" +
@@ -828,6 +850,7 @@ function runVelocityFilter() {
   const amazonFilter  = document.getElementById("f_amazon").value;
   const roiFilter     = document.getElementById("f_roi").value;
   const supplierFilter = document.getElementById("f_supplier").value;
+  const gatingFilter = document.getElementById("f_gating").value;
 
   const results = allAsins.filter(function(a) {
     if (priceBBDir) {
@@ -852,6 +875,7 @@ function runVelocityFilter() {
       const sources = allSources[a.asin] || [];
       if (!sources.some(function(s) { return s.supplier_name === supplierFilter; })) return false;
     }
+    if (gatingFilter && a.gating_status !== gatingFilter) return false;
     if (amazonFilter === "yes" && !a.amazon_selling) return false;
     if (amazonFilter === "no"  &&  a.amazon_selling) return false;
     if (roiFilter) {
@@ -898,7 +922,7 @@ function runVelocityFilter() {
 }
 
 function clearVelocityFilter() {
-  ["f_price_bb_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi","f_supplier"]
+  ["f_price_bb_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi","f_supplier","f_gating"]
     .forEach(function(id) { document.getElementById(id).value = ""; });
   document.getElementById("velocityBody").innerHTML =
     "<tr><td colspan='11' class='status-msg'>Set filters above and click Run Filter</td></tr>";
@@ -956,7 +980,9 @@ async function openDetail(asin) {
       (roiCalc ? (roiCalc.netProfit >= 0 ? "roi-positive" : "roi-negative") : "") + "'>" +
       (roiCalc ? "$" + roiCalc.netProfit.toFixed(2) : "-") + "</div></div>" +
     "<div class='metric-card'><div class='m-label'>Amazon Selling?</div><div class='m-value'>" +
-      (a.amazon_selling ? "<span class='badge-amz'>YES</span>" : "No") + "</div></div>";
+      (a.amazon_selling ? "<span class='badge-amz'>YES</span>" : "No") + "</div></div>" +
+    "<div class='metric-card'><div class='m-label'>Gating Status</div><div class='m-value'>" +
+      gatingBadge(a.asin, a.gating_status) + "</div></div>";
 
   document.getElementById("deltaTableBody").innerHTML =
     "<tr><td>Price</td>" +
@@ -1413,6 +1439,43 @@ async function backfillHistory() {
     status.textContent = "Back-fill failed";
     alert("Back-fill error: " + e.message);
   }
+}
+
+function gatingBadge(asin, status) {
+  status = status || "unknown";
+  const labels = {
+    "unknown":  "? Unknown",
+    "approved": "✓ Approved",
+    "gated":    "✗ Gated",
+    "pending":  "⏳ Pending"
+  };
+  const classes = {
+    "unknown":  "gate-unknown",
+    "approved": "gate-approved",
+    "gated":    "gate-gated",
+    "pending":  "gate-pending"
+  };
+  return "<button class='gate-btn " + classes[status] + "' " +
+    "onclick=\"cycleGating('" + asin + "', '" + status + "')\" " +
+    "title='Click to change gating status'>" +
+    labels[status] + "</button>" +
+    "<a href='https://sellercentral.amazon.com/product-search/search?q=" + asin + "' " +
+    "target='_blank' style='margin-left:4px;font-size:11px;color:var(--accent);text-decoration:none;' title='Check in Seller Central'>SC</a>";
+}
+
+async function cycleGating(asin, currentStatus) {
+  const next = { "unknown": "approved", "approved": "gated", "gated": "pending", "pending": "unknown" };
+  const newStatus = next[currentStatus] || "unknown";
+  try {
+    await fetch(API + "/asins/" + asin, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gating_status: newStatus })
+    });
+    const a = allAsins.find(function(x) { return x.asin === asin; });
+    if (a) a.gating_status = newStatus;
+    renderDashboard();
+  } catch(e) { alert("Error updating gating status: " + e.message); }
 }
   
 loadAll();
