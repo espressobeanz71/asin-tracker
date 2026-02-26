@@ -358,7 +358,6 @@ def sync_keepa():
             f"&asin={','.join(batch)}"
             f"&stats=1"
             f"&offers=20"
-            f"&history=1"
         )
 
         try:
