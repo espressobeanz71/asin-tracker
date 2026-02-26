@@ -126,6 +126,10 @@
     .gate-gated    { background: rgba(231,76,60,0.2); color: #e74c3c; }
     .gate-pending  { background: rgba(243,156,18,0.2); color: #f39c12; }
     .gate-btn { border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .gate-wrap { position: relative; display: inline-block; }
+    .gate-menu { position: absolute; top: 100%; left: 0; z-index: 200; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; min-width: 110px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); margin-top: 2px; }
+    .gate-option { padding: 7px 12px; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 4px; margin: 3px; }
+    .gate-option:hover { opacity: 0.8; }
   </style>
 </head>
 <body>
@@ -1455,17 +1459,35 @@ function gatingBadge(asin, status) {
     "gated":    "gate-gated",
     "pending":  "gate-pending"
   };
-  return "<button class='gate-btn " + classes[status] + "' " +
-    "onclick=\"cycleGating('" + asin + "', '" + status + "')\" " +
+  const options = ["unknown", "approved", "gated", "pending"]
+    .filter(function(s) { return s !== status; })
+    .map(function(s) {
+      return "<div class='gate-option " + classes[s] + "' onmousedown=\"setGating('" + asin + "', '" + s + "')\">" + labels[s] + "</div>";
+    }).join("");
+
+  return "<div class='gate-wrap'>" +
+    "<button class='gate-btn " + classes[status] + "' " +
+    "onclick=\"toggleGateMenu('" + asin + "')\" " +
     "title='Click to change gating status'>" +
     labels[status] + "</button>" +
+    "<div class='gate-menu' id='gate-menu-" + asin + "' style='display:none;'>" +
+    options +
+    "</div>" +
+    "</div>" +
     "<a href='https://sellercentral.amazon.com/product-search/search?q=" + asin + "' " +
     "target='_blank' style='margin-left:4px;font-size:11px;color:var(--accent);text-decoration:none;' title='Check in Seller Central'>SC</a>";
 }
 
-async function cycleGating(asin, currentStatus) {
-  const next = { "unknown": "approved", "approved": "gated", "gated": "pending", "pending": "unknown" };
-  const newStatus = next[currentStatus] || "unknown";
+function toggleGateMenu(asin) {
+  const menu = document.getElementById("gate-menu-" + asin);
+  const isVisible = menu.style.display !== "none";
+  // Close all open menus first
+  document.querySelectorAll(".gate-menu").forEach(function(m) { m.style.display = "none"; });
+  if (!isVisible) menu.style.display = "block";
+}
+
+async function setGating(asin, newStatus) {
+  document.querySelectorAll(".gate-menu").forEach(function(m) { m.style.display = "none"; });
   try {
     await fetch(API + "/asins/" + asin, {
       method: "PATCH",
@@ -1476,7 +1498,6 @@ async function cycleGating(asin, currentStatus) {
     if (a) a.gating_status = newStatus;
     renderDashboard();
   } catch(e) { alert("Error updating gating status: " + e.message); }
-}
   
 loadAll();
 </script>
