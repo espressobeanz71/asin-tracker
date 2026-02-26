@@ -1498,6 +1498,9 @@ async function setGating(asin, newStatus) {
     if (a) a.gating_status = newStatus;
     renderDashboard();
   } catch(e) { alert("Error updating gating status: " + e.message); }
+}
+
+loadAll();
   
 loadAll();
 </script>
