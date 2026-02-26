@@ -347,7 +347,7 @@ def sync_keepa():
 
     updated = 0
     errors = []
-    batch_size = 10
+    batch_size = 5
 
     for i in range(0, len(asins), batch_size):
         batch = asins[i:i+batch_size]
