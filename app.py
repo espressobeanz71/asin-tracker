@@ -419,6 +419,11 @@ def sync_keepa():
 
                 is_amazon = bool(stats.get("isAmazon", False))
 
+                # --- MONTHLY SOLD ---
+                monthly_sold = product.get("monthlySold")
+                if monthly_sold and monthly_sold < 0:
+                    monthly_sold = None
+                
                 # --- WEIGHT ---
                 weight_grams = product.get("packageWeight")
                 weight_lbs = None
@@ -462,6 +467,9 @@ def sync_keepa():
                 if image_url:
                     update_fields.append("image_url = %s")
                     update_vals.append(image_url)
+                if monthly_sold is not None:
+                    update_fields.append("monthly_sold = %s")
+                    update_vals.append(monthly_sold)
 
                 if update_fields:
                     update_vals.append(asin)
