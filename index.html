@@ -44,7 +44,7 @@
     .form-actions { display: flex; gap: 10px; margin-top: 16px; }
     .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead th { background: #12152a; padding: 11px 14px; text-align: left; font-size: 11px; text-transform: uppercase; ter-spacing: 0.5px; color: var(--accent); white-space: nowrap; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+    thead th { background: #12152a; padding: 11px 14px; text-align: left; font-size: 11px; text-transform: uppercase; color: var(--accent); white-space: nowrap; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
     thead th:hover { background: #1a1d3a; }
     tbody tr { border-bottom: 1px solid #1e2138; transition: background 0.15s; }
     tbody tr:hover { background: #1e2240; }
@@ -61,10 +61,11 @@
     .status-msg { text-align: center; padding: 50px; color: #444; font-size: 14px; }
     .collapsible { display: none; }
     .collapsible.open { display: block; }
-    .filter-builder { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .filter-builder { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .filter-row { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
-    .filter-row label { font-size: 12px; color: var(--text); flex: 1; }
+    .filter-row label { font-size: 12px; color: var(--text); flex: 1; min-width: 100px; }
     .filter-row select { background: var(--surface); border: 1px solid var(--border); border-radius: 5px; color: var(--text); font-size: 12px; padding: 4px 8px; }
+    .filter-row input[type=number] { width: 80px; background: var(--surface); border: 1px solid var(--border); border-radius: 5px; color: var(--text); font-size: 12px; padding: 4px 8px; }
     .detail-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
     .detail-title { font-size: 22px; font-weight: 700; color: var(--accent); }
     .detail-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
@@ -73,10 +74,10 @@
     .product-image { width: 120px; height: 120px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); background: #fff; padding: 6px; }
     .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
     .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-    .metric-card .m-label { font-size: 11px; color: var(--muted); text-transform: uppercase; ter-spacing: 0.5px; margin-bottom: 6px; }
+    .metric-card .m-label { font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
     .metric-card .m-value { font-size: 20px; font-weight: 700; color: var(--text); }
     .delta-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .delta-table th { background: #12152a; padding: 10px 14px; text-align: left; font-size: 11px; color: var(--accent); text-transform: uppercase; ter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+    .delta-table th { background: #12152a; padding: 10px 14px; text-align: left; font-size: 11px; color: var(--accent); text-transform: uppercase; border-bottom: 1px solid var(--border); }
     .delta-table td { padding: 10px 14px; border-bottom: 1px solid #1e2138; }
     .chart-container { position: relative; height: 280px; margin-bottom: 8px; }
     .period-btns { display: flex; gap: 8px; margin-bottom: 16px; }
@@ -90,37 +91,16 @@
     .source-link:hover { text-decoration: underline; }
     .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
     .setting-item { display: flex; flex-direction: column; gap: 6px; }
-    .setting-item label { font-size: 12px; color: var(--muted); text-transform: uppercase; ter-spacing: 0.5px; }
+    .setting-item label { font-size: 12px; color: var(--muted); text-transform: uppercase; }
     .setting-item input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; color: var(--text); font-size: 14px; }
     .setting-item input:focus { outline: none; border-color: var(--accent); }
     .setting-item .hint { font-size: 11px; color: #555; }
-    .autocompe-wrap { position: relative; }
-    .autocompe-list {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: var(--surface);
-      border: 1px solid var(--accent);
-      border-radius: 0 0 6px 6px;
-      z-index: 100;
-      max-height: 160px;
-      overflow-y: auto;
-    }
-    .autocomplete-item {
-      padding: 8px 12px;
-      font-size: 13px;
-      cursor: pointer;
-      color: var(--text);
-    }
+    .autocomplete-wrap { position: relative; }
+    .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--accent); border-radius: 0 0 6px 6px; z-index: 100; max-height: 160px; overflow-y: auto; }
+    .autocomplete-item { padding: 8px 12px; font-size: 13px; cursor: pointer; color: var(--text); }
     .autocomplete-item:hover { background: var(--border); }
     .clickable-stat { cursor: pointer; transition: border-color 0.2s, transform 0.1s; }
     .clickable-stat:hover { border-color: var(--accent); transform: translateY(-2px); }
-    .gate-unknown  { background: #2a2a3a; color: #888; }
-    .gate-approved { background: rgba(46,204,113,0.2); color: #2ecc71; }
-    .gate-gated    { background: rgba(231,76,60,0.2); color: #e74c3c; }
-    .gate-pending  { background: rgba(243,156,18,0.2); color: #f39c12; }
-    .gate-btn { border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
     .gate-unknown  { background: #2a2a3a; color: #888; }
     .gate-approved { background: rgba(46,204,113,0.2); color: #2ecc71; }
     .gate-gated    { background: rgba(231,76,60,0.2); color: #e74c3c; }
@@ -184,7 +164,7 @@
       <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
         <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Purchase Source (optional)</div>
         <div class="form-row">
-         <div class="form-group autocomplete-wrap">
+          <div class="form-group autocomplete-wrap">
             <label>Supplier Name</label>
             <input type="text" id="iSupplier" placeholder="e.g. Walmart"
               oninput="showSupplierSuggestions(this.value)"
@@ -233,12 +213,13 @@
           <th onclick="dashSort('weight')">Weight</th>
           <th onclick="dashSort('cost')">Cost</th>
           <th onclick="dashSort('roi')">ROI</th>
+          <th onclick="dashSort('monthly_sold')">Mo. Sales</th>
           <th onclick="dashSort('gating_status')">Gating</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody id="dashBody">
-        <tr><td colspan="11" class="status-msg">Loading...</td></tr>
+        <tr><td colspan="12" class="status-msg">Loading...</td></tr>
       </tbody>
     </table>
   </div>
@@ -249,6 +230,7 @@
   <div class="panel">
     <h3>Filter Builder - combine any rules</h3>
     <div class="filter-builder">
+
       <div class="filter-row">
         <label>Gating</label>
         <select id="f_gating">
@@ -259,8 +241,25 @@
           <option value="unknown">Unknown</option>
         </select>
       </div>
+
       <div class="filter-row">
-        <label>Price</label>
+        <label>Amazon Selling</label>
+        <select id="f_amazon">
+          <option value="">Any</option>
+          <option value="yes">Yes - Amazon in</option>
+          <option value="no">No - Amazon out</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <label>Supplier</label>
+        <select id="f_supplier" style="flex:2;">
+          <option value="">Any</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <label>Price Trend</label>
         <select id="f_price_bb_dir">
           <option value="">Any</option>
           <option value="up">Trending Up</option>
@@ -272,8 +271,9 @@
           <option value="180">180d</option>
         </select>
       </div>
+
       <div class="filter-row">
-        <label>Seller Count</label>
+        <label>Seller Count Trend</label>
         <select id="f_sellers_dir">
           <option value="">Any</option>
           <option value="down">Decreasing</option>
@@ -285,8 +285,9 @@
           <option value="180">180d</option>
         </select>
       </div>
+
       <div class="filter-row">
-        <label>Sales Rank</label>
+        <label>Sales Rank Trend</label>
         <select id="f_rank_dir">
           <option value="">Any</option>
           <option value="down">Improving</option>
@@ -298,22 +299,9 @@
           <option value="180">180d</option>
         </select>
       </div>
+
       <div class="filter-row">
-        <label>Supplier</label>
-        <select id="f_supplier" style="flex:2;">
-          <option value="">Any</option>
-        </select>
-      </div>
-      <div class="filter-row">
-        <label>Amazon Selling</label>
-        <select id="f_amazon">
-          <option value="">Any</option>
-          <option value="yes">Yes - Amazon in</option>
-          <option value="no">No - Amazon out</option>
-        </select>
-      </div>
-      <div class="filter-row">
-        <label>ROI</label>
+        <label>ROI (quick)</label>
         <select id="f_roi">
           <option value="">Any</option>
           <option value="pos">Positive</option>
@@ -323,6 +311,85 @@
           <option value="50">50% or more</option>
         </select>
       </div>
+
+      <div class="filter-row">
+        <label>Monthly Sales</label>
+        <select id="f_monthly_op">
+          <option value="">Any</option>
+          <option value="gte">At least</option>
+          <option value="lte">At most</option>
+          <option value="gt">Greater than</option>
+          <option value="lt">Less than</option>
+          <option value="eq">Equal to</option>
+        </select>
+        <input type="number" id="f_monthly_val" placeholder="e.g. 50"/>
+      </div>
+
+      <div class="filter-row">
+        <label>Current Price ($)</label>
+        <select id="f_price_op">
+          <option value="">Any</option>
+          <option value="gte">At least</option>
+          <option value="lte">At most</option>
+          <option value="gt">Greater than</option>
+          <option value="lt">Less than</option>
+          <option value="eq">Equal to</option>
+        </select>
+        <input type="number" id="f_price_val" step="0.01" placeholder="e.g. 20.00"/>
+      </div>
+
+      <div class="filter-row">
+        <label>Current Sales Rank</label>
+        <select id="f_rank_op">
+          <option value="">Any</option>
+          <option value="gte">At least</option>
+          <option value="lte">At most</option>
+          <option value="gt">Greater than</option>
+          <option value="lt">Less than</option>
+          <option value="eq">Equal to</option>
+        </select>
+        <input type="number" id="f_rank_val" placeholder="e.g. 50000"/>
+      </div>
+
+      <div class="filter-row">
+        <label>Current Seller Count</label>
+        <select id="f_sellers_op">
+          <option value="">Any</option>
+          <option value="gte">At least</option>
+          <option value="lte">At most</option>
+          <option value="gt">Greater than</option>
+          <option value="lt">Less than</option>
+          <option value="eq">Equal to</option>
+        </select>
+        <input type="number" id="f_sellers_val" placeholder="e.g. 10"/>
+      </div>
+
+      <div class="filter-row">
+        <label>ROI %</label>
+        <select id="f_roi_op">
+          <option value="">Any</option>
+          <option value="gte">At least</option>
+          <option value="lte">At most</option>
+          <option value="gt">Greater than</option>
+          <option value="lt">Less than</option>
+          <option value="eq">Equal to</option>
+        </select>
+        <input type="number" id="f_roi_val" placeholder="e.g. 30"/>
+      </div>
+
+      <div class="filter-row">
+        <label>Weight (lbs)</label>
+        <select id="f_weight_op">
+          <option value="">Any</option>
+          <option value="gte">At least</option>
+          <option value="lte">At most</option>
+          <option value="gt">Greater than</option>
+          <option value="lt">Less than</option>
+          <option value="eq">Equal to</option>
+        </select>
+        <input type="number" id="f_weight_val" step="0.01" placeholder="e.g. 1.5"/>
+      </div>
+
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-primary" onclick="runVelocityFilter()">Run Filter</button>
@@ -339,6 +406,7 @@
           <th>Price</th>
           <th>Rank</th>
           <th>Sellers</th>
+          <th>Mo. Sales</th>
           <th>Amazon?</th>
           <th>ROI</th>
           <th>Price Delta</th>
@@ -348,7 +416,7 @@
         </tr>
       </thead>
       <tbody id="velocityBody">
-        <tr><td colspan="11" class="status-msg">Set filters above and click Run Filter</td></tr>
+        <tr><td colspan="12" class="status-msg">Set filters above and click Run Filter</td></tr>
       </tbody>
     </table>
   </div>
@@ -457,6 +525,7 @@
     </div>
   </div>
 </div>
+
 <!-- BULK IMPORT -->
 <div class="page" id="page-bulk">
   <div class="panel">
@@ -468,7 +537,7 @@
     </p>
     <textarea id="bulkInput" placeholder="B000BPDGUU, 11.49, https://www.walmart.com/ip/example, Walmart
 B087QPPF3Z, 9.81, https://www.homedepot.com/p/example, Home Depot
-B07SCN6QVZ, 6.00" 
+B07SCN6QVZ, 6.00"
       style="width:100%;height:160px;background:var(--bg);border:1px solid var(--border);
              border-radius:6px;padding:12px;color:var(--text);font-size:13px;
              font-family:'Segoe UI',sans-serif;resize:vertical;line-height:1.6;">
@@ -508,7 +577,7 @@ B07SCN6QVZ, 6.00"
     </div>
   </div>
 </div>
-  
+
 <!-- SETTINGS -->
 <div class="page" id="page-settings">
   <div class="panel">
@@ -560,6 +629,8 @@ let currentDetailAsin = null;
 let detailPeriod = 30;
 let previousPage = "dashboard";
 let priceChart = null, rankChart = null, sellersChart = null;
+let knownSuppliers = [];
+let bulkLeads = [];
 
 const REFERRAL_FEES = {
   "baby": 0.08, "beauty": 0.08, "clothing": 0.17, "apparel": 0.17,
@@ -573,8 +644,8 @@ const REFERRAL_FEES = {
 function getReferralFee(category) {
   if (!category) return 0.15;
   const lower = category.toLowerCase();
-  for (const [key, val] of Object.entries(REFERRAL_FEES)) {
-    if (lower.includes(key)) return val;
+  for (const key in REFERRAL_FEES) {
+    if (lower.includes(key)) return REFERRAL_FEES[key];
   }
   return 0.15;
 }
@@ -594,7 +665,21 @@ function calcROI(asin) {
   const amazonFees = (price * referralPct) + fbaFee;
   const netProfit  = price - amazonFees - trueCost;
   const roi        = (netProfit / trueCost) * 100;
-  return { roi, netProfit, trueCost, amazonFees };
+  return { roi: roi, netProfit: netProfit, trueCost: trueCost, amazonFees: amazonFees };
+}
+
+function compareVal(actual, op, target) {
+  if (!op || target === "" || target === null || target === undefined) return true;
+  if (actual === null || actual === undefined) return false;
+  const a = parseFloat(actual);
+  const t = parseFloat(target);
+  if (isNaN(a) || isNaN(t)) return false;
+  if (op === "gt")  return a > t;
+  if (op === "gte") return a >= t;
+  if (op === "lt")  return a < t;
+  if (op === "lte") return a <= t;
+  if (op === "eq")  return a === t;
+  return true;
 }
 
 function showPage(name) {
@@ -602,7 +687,7 @@ function showPage(name) {
   document.querySelectorAll(".nav-btn").forEach(function(b) { b.classList.remove("active"); });
   document.getElementById("page-" + name).classList.add("active");
   document.querySelectorAll(".nav-btn").forEach(function(b) {
-    if (b.textContent.toLowerCase().includes(name.substring(0,4)))
+    if (b.textContent.toLowerCase().includes(name.substring(0, 4)))
       b.classList.add("active");
   });
   previousPage = name;
@@ -636,7 +721,7 @@ async function loadAsins() {
     renderDashboard();
   } catch(e) {
     document.getElementById("dashBody").innerHTML =
-      "<tr><td colspan='10' class='status-msg'>Error loading data.</td></tr>";
+      "<tr><td colspan='12' class='status-msg'>Error loading data.</td></tr>";
   }
 }
 
@@ -652,13 +737,11 @@ async function loadAllSources() {
   try {
     const res  = await fetch(API + "/sources");
     const data = await res.json();
-    // Group by asin
     allSources = {};
     data.forEach(function(s) {
       if (!allSources[s.asin]) allSources[s.asin] = [];
       allSources[s.asin].push(s);
     });
-    // Populate supplier dropdown and autocomplete list
     const supplierNames = data.map(function(s) { return s.supplier_name; }).filter(Boolean);
     const suppliers = supplierNames.filter(function(v, i) { return supplierNames.indexOf(v) === i; }).sort();
     knownSuppliers = suppliers;
@@ -672,8 +755,6 @@ async function loadAllSources() {
     });
   } catch(e) { console.error("Load all sources error", e); }
 }
-
-let knownSuppliers = [];
 
 function showSupplierSuggestions(val) {
   const list = document.getElementById("supplierSuggestions");
@@ -696,7 +777,7 @@ function pickSupplier(name) {
   document.getElementById("iSupplier").value = name;
   hideSupplierSuggestions();
 }
-  
+
 function updateStats() {
   document.getElementById("statTotal").textContent = allAsins.length;
   document.getElementById("statAmazon").textContent =
@@ -723,7 +804,9 @@ function getPrice(r) {
 
 function renderDashboard() {
   const search = (document.getElementById("dashSearch").value || "").toLowerCase();
-  let rows = allAsins.map(function(a) { return Object.assign({}, a, { roi: calcROI(a) ? calcROI(a).roi : null }); });
+  let rows = allAsins.map(function(a) {
+    return Object.assign({}, a, { roi: calcROI(a) ? calcROI(a).roi : null });
+  });
   if (search) {
     rows = rows.filter(function(r) {
       return r.asin.toLowerCase().includes(search) ||
@@ -739,7 +822,7 @@ function renderDashboard() {
   }
   if (!rows.length) {
     document.getElementById("dashBody").innerHTML =
-      "<tr><td colspan='11' class='status-msg'>No ASINs found.</td></tr>"
+      "<tr><td colspan='12' class='status-msg'>No ASINs found.</td></tr>";
     return;
   }
   const html = rows.map(function(r) {
@@ -754,10 +837,12 @@ function renderDashboard() {
       "<td>" + (r.brand || "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (price != null ? "$" + Number(price).toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.current_rank != null ? Number(r.current_rank).toLocaleString() : "<span class='no-data'>-</span>") + "</td>" +
-      "<td style='" + (r.amazon_selling ? "background:rgba(243,156,18,0.25);font-weight:700;" : "") + "'>" + (r.current_sellers != null ? r.current_sellers : "<span class='no-data'>-</span>") + "</td>" +
+      "<td style='" + (r.amazon_selling ? "background:rgba(243,156,18,0.25);font-weight:700;" : "") + "'>" +
+        (r.current_sellers != null ? r.current_sellers : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.weight != null ? Number(r.weight).toFixed(2) + " lb" : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.cost != null ? "$" + Number(r.cost).toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + roiStr + "</td>" +
+      "<td>" + (r.monthly_sold != null ? Number(r.monthly_sold).toLocaleString() : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + gatingBadge(r.asin, r.gating_status) + "</td>" +
       "<td style='display:flex;gap:6px;'>" +
         "<button class='btn btn-primary btn-sm' onclick=\"openDetail('" + r.asin + "')\">View</button>" +
@@ -838,6 +923,28 @@ async function syncKeepa() {
   }
 }
 
+async function backfillHistory() {
+  const status = document.getElementById("syncStatus");
+  status.textContent = "Back-filling history...";
+  try {
+    const res  = await fetch(API + "/backfill", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+    const data = await res.json();
+    if (data.message) {
+      status.textContent = data.message;
+    } else {
+      status.textContent = "Back-fill done: " + data.filled + " ASINs filled";
+    }
+    await loadAsins();
+  } catch(e) {
+    status.textContent = "Back-fill failed";
+    alert("Back-fill error: " + e.message);
+  }
+}
+
 function getDeltaForFilter(asin, metric, period) {
   const d = allDeltas[asin];
   if (!d) return null;
@@ -845,16 +952,28 @@ function getDeltaForFilter(asin, metric, period) {
 }
 
 function runVelocityFilter() {
-  const priceBBDir    = document.getElementById("f_price_bb_dir").value;
-  const priceBBPeriod = document.getElementById("f_price_bb_period").value;
-  const sellersDir    = document.getElementById("f_sellers_dir").value;
-  const sellersPeriod = document.getElementById("f_sellers_period").value;
-  const rankDir       = document.getElementById("f_rank_dir").value;
-  const rankPeriod    = document.getElementById("f_rank_period").value;
-  const amazonFilter  = document.getElementById("f_amazon").value;
-  const roiFilter     = document.getElementById("f_roi").value;
+  const priceBBDir     = document.getElementById("f_price_bb_dir").value;
+  const priceBBPeriod  = document.getElementById("f_price_bb_period").value;
+  const sellersDir     = document.getElementById("f_sellers_dir").value;
+  const sellersPeriod  = document.getElementById("f_sellers_period").value;
+  const rankDir        = document.getElementById("f_rank_dir").value;
+  const rankPeriod     = document.getElementById("f_rank_period").value;
+  const amazonFilter   = document.getElementById("f_amazon").value;
+  const roiFilter      = document.getElementById("f_roi").value;
   const supplierFilter = document.getElementById("f_supplier").value;
-  const gatingFilter = document.getElementById("f_gating").value;
+  const gatingFilter   = document.getElementById("f_gating").value;
+  const monthlyOp      = document.getElementById("f_monthly_op").value;
+  const monthlyVal     = document.getElementById("f_monthly_val").value;
+  const priceOp        = document.getElementById("f_price_op").value;
+  const priceVal       = document.getElementById("f_price_val").value;
+  const rankOp         = document.getElementById("f_rank_op").value;
+  const rankVal        = document.getElementById("f_rank_val").value;
+  const sellersOp      = document.getElementById("f_sellers_op").value;
+  const sellersVal     = document.getElementById("f_sellers_val").value;
+  const roiOp          = document.getElementById("f_roi_op").value;
+  const roiVal         = document.getElementById("f_roi_val").value;
+  const weightOp       = document.getElementById("f_weight_op").value;
+  const weightVal      = document.getElementById("f_weight_val").value;
 
   const results = allAsins.filter(function(a) {
     if (priceBBDir) {
@@ -889,6 +1008,13 @@ function runVelocityFilter() {
       if (roiFilter === "neg" && r.roi >= 0) return false;
       if (!isNaN(roiFilter) && r.roi < parseFloat(roiFilter)) return false;
     }
+    if (!compareVal(a.monthly_sold, monthlyOp, monthlyVal)) return false;
+    if (!compareVal(getPrice(a), priceOp, priceVal)) return false;
+    if (!compareVal(a.current_rank, rankOp, rankVal)) return false;
+    if (!compareVal(a.current_sellers, sellersOp, sellersVal)) return false;
+    if (!compareVal(a.weight, weightOp, weightVal)) return false;
+    const roiCalc = calcROI(a);
+    if (!compareVal(roiCalc ? roiCalc.roi : null, roiOp, roiVal)) return false;
     return true;
   });
 
@@ -897,7 +1023,7 @@ function runVelocityFilter() {
 
   if (!results.length) {
     document.getElementById("velocityBody").innerHTML =
-      "<tr><td colspan='11' class='status-msg'>No ASINs match your current filters.</td></tr>";
+      "<tr><td colspan='12' class='status-msg'>No ASINs match your current filters.</td></tr>";
     return;
   }
 
@@ -914,6 +1040,7 @@ function runVelocityFilter() {
       "<td>" + (price != null ? "$" + Number(price).toFixed(2) : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.current_rank != null ? Number(r.current_rank).toLocaleString() : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.current_sellers != null ? r.current_sellers : "<span class='no-data'>-</span>") + "</td>" +
+      "<td>" + (r.monthly_sold != null ? Number(r.monthly_sold).toLocaleString() : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + (r.amazon_selling ? "<span class='badge-amz'>AMZ</span>" : "<span class='no-data'>-</span>") + "</td>" +
       "<td>" + roiStr + "</td>" +
       "<td class='" + deltaClass(d.price_delta_30) + "'>" + fmtDelta(d.price_delta_30, "$") + "</td>" +
@@ -926,17 +1053,20 @@ function runVelocityFilter() {
 }
 
 function clearVelocityFilter() {
-  ["f_price_bb_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi","f_supplier","f_gating"]
+  ["f_price_bb_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi","f_supplier","f_gating",
+   "f_monthly_op","f_price_op","f_rank_op","f_sellers_op","f_roi_op","f_weight_op"]
+    .forEach(function(id) { document.getElementById(id).value = ""; });
+  ["f_monthly_val","f_price_val","f_rank_val","f_sellers_val","f_roi_val","f_weight_val"]
     .forEach(function(id) { document.getElementById(id).value = ""; });
   document.getElementById("velocityBody").innerHTML =
-    "<tr><td colspan='11' class='status-msg'>Set filters above and click Run Filter</td></tr>";
+    "<tr><td colspan='12' class='status-msg'>Set filters above and click Run Filter</td></tr>";
   document.getElementById("velocityCount").textContent = "";
 }
 
 async function openDetail(asin) {
   currentDetailAsin = asin;
   detailPeriod = 30;
-  previousPage = document.querySelector(".page.active").id.replace("page-","");
+  previousPage = document.querySelector(".page.active").id.replace("page-", "");
   document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
   document.getElementById("page-detail").classList.add("active");
 
@@ -973,6 +1103,8 @@ async function openDetail(asin) {
       (a.current_rank != null ? Number(a.current_rank).toLocaleString() : "-") + "</div></div>" +
     "<div class='metric-card'><div class='m-label'>Sellers</div><div class='m-value'>" +
       (a.current_sellers != null ? a.current_sellers : "-") + "</div></div>" +
+    "<div class='metric-card'><div class='m-label'>Monthly Sales</div><div class='m-value'>" +
+      (a.monthly_sold != null ? Number(a.monthly_sold).toLocaleString() : "-") + "</div></div>" +
     "<div class='metric-card'><div class='m-label'>Weight</div><div class='m-value'>" +
       (a.weight != null ? Number(a.weight).toFixed(2) + " lb" : "-") + "</div></div>" +
     "<div class='metric-card'><div class='m-label'>Category</div><div class='m-value' style='font-size:13px;'>" +
@@ -1040,10 +1172,10 @@ function downsample(data, days) {
     .map(function(b) {
       return {
         captured_at:  b.captured_at,
-        buybox_price: b.buybox_price.length  ? avg(b.buybox_price)            : null,
-        new_price:    b.new_price.length     ? avg(b.new_price)               : null,
-        rank:         b.rank.length          ? Math.round(avg(b.rank))        : null,
-        seller_count: b.seller_count.length  ? Math.round(avg(b.seller_count)): null
+        buybox_price: b.buybox_price.length  ? avg(b.buybox_price)             : null,
+        new_price:    b.new_price.length     ? avg(b.new_price)                : null,
+        rank:         b.rank.length          ? Math.round(avg(b.rank))         : null,
+        seller_count: b.seller_count.length  ? Math.round(avg(b.seller_count)) : null
       };
     });
 }
@@ -1089,9 +1221,7 @@ function drawChart(canvasId, labels, datasets, prefix, existingChart, setChart) 
       plugins: {
         legend: { labels: { color: "#aaa", font: { size: 12 } } },
         tooltip: {
-          mode: "nearest",
-          axis: "x",
-          intersect: false,
+          mode: "nearest", axis: "x", intersect: false,
           callbacks: {
             label: function(ctx) {
               const val = ctx.raw;
@@ -1235,14 +1365,15 @@ function fmtDelta(val, prefix) {
 }
 
 function quickFilter(type) {
-  // Reset all filters first
-  ["f_price_bb_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi","f_supplier"]
+  ["f_price_bb_dir","f_sellers_dir","f_rank_dir","f_amazon","f_roi","f_supplier","f_gating",
+   "f_monthly_op","f_price_op","f_rank_op","f_sellers_op","f_roi_op","f_weight_op"]
+    .forEach(function(id) { document.getElementById(id).value = ""; });
+  ["f_monthly_val","f_price_val","f_rank_val","f_sellers_val","f_roi_val","f_weight_val"]
     .forEach(function(id) { document.getElementById(id).value = ""; });
   document.getElementById("f_price_bb_period").value = "30";
   document.getElementById("f_sellers_period").value  = "30";
   document.getElementById("f_rank_period").value     = "30";
 
-  // Apply the relevant filter
   if (type === "amazon") {
     document.getElementById("f_amazon").value = "yes";
   } else if (type === "priceUp") {
@@ -1255,12 +1386,9 @@ function quickFilter(type) {
     document.getElementById("f_roi").value = "pos";
   }
 
-  // Switch to velocity page and run the filter
   showPage("velocity");
   runVelocityFilter();
 }
-
-let bulkLeads = [];
 
 function parseBulkInput() {
   const raw = document.getElementById("bulkInput").value.trim();
@@ -1270,11 +1398,9 @@ function parseBulkInput() {
   bulkLeads = [];
 
   lines.forEach(function(line) {
-    // Support comma or tab separation
     const parts = line.split(/,|\t/).map(function(p) { return p.trim(); });
     const asin  = (parts[0] || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
     if (!asin || asin.length !== 10) return;
-
     bulkLeads.push({
       asin:          asin,
       cost:          parts[1] ? parseFloat(parts[1]) || null : null,
@@ -1295,12 +1421,12 @@ function parseBulkInput() {
 
 function renderBulkPreview() {
   const html = bulkLeads.map(function(r, i) {
-    const statusColor = r.status === "ready"    ? "var(--muted)"
+    const statusColor = r.status === "ready"   ? "var(--muted)"
       : r.status === "done"    ? "var(--green)"
       : r.status === "exists"  ? "var(--orange)"
       : r.status === "warning" ? "var(--orange)"
       : "var(--red)";
-    const statusText = r.status === "ready"    ? "Ready"
+    const statusText = r.status === "ready"   ? "Ready"
       : r.status === "done"    ? "Imported"
       : r.status === "exists"  ? "Already exists"
       : r.status === "warning" ? (r.errorMsg || "Warning")
@@ -1319,12 +1445,10 @@ function renderBulkPreview() {
   document.getElementById("bulkPreviewBody").innerHTML = html ||
     "<tr><td colspan='6' class='status-msg'>No valid leads to import.</td></tr>";
 }
+
 function removeBulkRow(i) {
   bulkLeads.splice(i, 1);
-  if (!bulkLeads.length) {
-    clearBulkImport();
-    return;
-  }
+  if (!bulkLeads.length) { clearBulkImport(); return; }
   renderBulkPreview();
 }
 
@@ -1341,16 +1465,14 @@ async function importAllBulk() {
     progress.textContent = "Importing " + (i + 1) + " of " + ready.length + "...";
 
     try {
-      // Validate ASIN format before even trying
       if (!lead.asin || lead.asin.length !== 10 || !/^[A-Z0-9]{10}$/.test(lead.asin)) {
         lead.status = "error";
-        lead.errorMsg = "Invalid ASIN format — must be 10 alphanumeric characters";
+        lead.errorMsg = "Invalid ASIN format";
         errors++;
         renderBulkPreview();
         continue;
       }
 
-      // Add ASIN
       const res = await fetch(API + "/asins", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1359,46 +1481,29 @@ async function importAllBulk() {
 
       if (res.status === 409) {
         lead.status = "exists";
-        lead.errorMsg = null;
         skipped++;
       } else if (!res.ok) {
         let msg = "Server error " + res.status;
-        try {
-          const errData = await res.json();
-          if (errData.error) msg = errData.error;
-        } catch(e) {}
+        try { const ed = await res.json(); if (ed.error) msg = ed.error; } catch(e) {}
         lead.status = "error";
         lead.errorMsg = msg;
         errors++;
       } else {
-        // Add source if URL provided
         if (lead.url) {
           const srcRes = await fetch(API + "/sources", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              asin:          lead.asin,
-              supplier_name: lead.supplier_name,
-              url:           lead.url,
-              cost:          lead.cost
-            })
+            body: JSON.stringify({ asin: lead.asin, supplier_name: lead.supplier_name, url: lead.url, cost: lead.cost })
           });
           if (!srcRes.ok) {
-            let srcMsg = "ASIN imported but source failed to save";
-            try {
-              const srcErr = await srcRes.json();
-              if (srcErr.error) srcMsg = "ASIN imported but source error: " + srcErr.error;
-            } catch(e) {}
             lead.status = "warning";
-            lead.errorMsg = srcMsg;
+            lead.errorMsg = "ASIN imported but source failed to save";
           } else {
             lead.status = "done";
-            lead.errorMsg = null;
             done++;
           }
         } else {
           lead.status = "done";
-          lead.errorMsg = null;
           done++;
         }
       }
@@ -1415,73 +1520,35 @@ async function importAllBulk() {
   progress.style.color = errors > 0 ? "var(--orange)" : "var(--green)";
   await Promise.all([loadAsins(), loadAllSources()]);
 }
+
 function clearBulkImport() {
   bulkLeads = [];
   document.getElementById("bulkInput").value = "";
   document.getElementById("bulkPreviewPanel").style.display = "none";
   document.getElementById("bulkProgress").style.display = "none";
-  document.getElementById("bulkProgress").style.color = "var(--muted)";
-}
-
-async function backfillHistory() {
-  const status = document.getElementById("syncStatus");
-  status.textContent = "Back-filling history...";
-  try {
-    const res  = await fetch(API + "/backfill", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({})
-    });
-    const data = await res.json();
-    if (data.message) {
-      status.textContent = data.message;
-    } else {
-      status.textContent = "Back-fill done: " + data.filled + " ASINs filled";
-    }
-    await loadAsins();
-  } catch(e) {
-    status.textContent = "Back-fill failed";
-    alert("Back-fill error: " + e.message);
-  }
 }
 
 function gatingBadge(asin, status) {
   status = status || "unknown";
-  const labels = {
-    "unknown":  "? Unknown",
-    "approved": "✓ Approved",
-    "gated":    "✗ Gated",
-    "pending":  "⏳ Pending"
-  };
-  const classes = {
-    "unknown":  "gate-unknown",
-    "approved": "gate-approved",
-    "gated":    "gate-gated",
-    "pending":  "gate-pending"
-  };
-  const options = ["unknown", "approved", "gated", "pending"]
+  const labels   = { "unknown": "? Unknown", "approved": "✓ Approved", "gated": "✗ Gated", "pending": "⏳ Pending" };
+  const classes  = { "unknown": "gate-unknown", "approved": "gate-approved", "gated": "gate-gated", "pending": "gate-pending" };
+  const options  = ["unknown", "approved", "gated", "pending"]
     .filter(function(s) { return s !== status; })
     .map(function(s) {
       return "<div class='gate-option " + classes[s] + "' onmousedown=\"setGating('" + asin + "', '" + s + "')\">" + labels[s] + "</div>";
     }).join("");
-
   return "<div class='gate-wrap'>" +
-    "<button class='gate-btn " + classes[status] + "' " +
-    "onclick=\"toggleGateMenu('" + asin + "')\" " +
-    "title='Click to change gating status'>" +
+    "<button class='gate-btn " + classes[status] + "' onclick=\"toggleGateMenu('" + asin + "')\" title='Click to change'>" +
     labels[status] + "</button>" +
-    "<div class='gate-menu' id='gate-menu-" + asin + "' style='display:none;'>" +
-    options +
+    "<div class='gate-menu' id='gate-menu-" + asin + "' style='display:none;'>" + options + "</div>" +
     "</div>" +
-    "</div>" +
-    "<a href='https://sellercentral.amazon.com/product-search/search?q=" + asin + "' " +
-    "target='_blank' style='margin-left:4px;font-size:11px;color:var(--accent);text-decoration:none;' title='Check in Seller Central'>SC</a>";
+    "<a href='https://sellercentral.amazon.com/product-search/search?q=" + asin + "' target='_blank' " +
+    "style='margin-left:4px;font-size:11px;color:var(--accent);text-decoration:none;' title='Check in Seller Central'>SC</a>";
 }
 
 function toggleGateMenu(asin) {
   const menu = document.getElementById("gate-menu-" + asin);
   const isVisible = menu.style.display !== "none";
-  // Close all open menus first
   document.querySelectorAll(".gate-menu").forEach(function(m) { m.style.display = "none"; });
   if (!isVisible) menu.style.display = "block";
 }
@@ -1500,8 +1567,6 @@ async function setGating(asin, newStatus) {
   } catch(e) { alert("Error updating gating status: " + e.message); }
 }
 
-loadAll();
-  
 loadAll();
 </script>
 </body>
